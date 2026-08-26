@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "npm@10.9.2",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": ["apps/*", "apps/backend/*", "packages/*"],
   "scripts": {
     "dev": "npm run dev --workspace=@lms/frontend",
     "dev:frontend": "npm run dev --workspace=@lms/frontend",
-    "dev:backend": "npm run start:dev --workspace=@lms/backend",
+    "dev:backend": "npm run start:dev --workspace=@lms/api-gateway",
+    "dev:gateway": "npm run start:dev --workspace=@lms/api-gateway",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"

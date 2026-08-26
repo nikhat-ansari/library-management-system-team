@@ -1,10 +1,104 @@
+name: library-management-system
+
+x-lms-service: &lms-service
+  restart: unless-stopped
+  depends_on:
+    mongodb:
+      condition: service_healthy
+  environment:
+    NODE_ENV: production
+    MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017}
+  networks:
+    - lms
+
 services:
   mongodb:
     image: mongo:8
+    restart: unless-stopped
     ports:
-      - '27017:27017'
+      - '${MONGODB_PORT:-27017}:27017'
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.runCommand({ ping: 1 }).ok']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lms
+
+  api-gateway:
+    <<: *lms-service
+    build:
+      context: .
+      dockerfile: apps/backend/api-gateway/Dockerfile
+    ports:
+      - '${API_GATEWAY_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SERVICE_NAME: api-gateway
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017}
+
+  auth-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/auth-service/Dockerfile }
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      SERVICE_NAME: auth-service
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017}
+      JWT_SECRET: ${JWT_SECRET:-replace-with-a-long-random-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+
+  user-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/user-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3002, SERVICE_NAME: user-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  catalog-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/catalog-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3003, SERVICE_NAME: catalog-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  circulation-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/circulation-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3004, SERVICE_NAME: circulation-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  reservation-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/reservation-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3005, SERVICE_NAME: reservation-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  fine-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/fine-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3006, SERVICE_NAME: fine-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  seat-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/seat-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3007, SERVICE_NAME: seat-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  notification-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/notification-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3008, SERVICE_NAME: notification-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  report-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/report-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3009, SERVICE_NAME: report-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  audit-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/audit-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3010, SERVICE_NAME: audit-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+  ai-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/ai-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3011, SERVICE_NAME: ai-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}', AI_ENABLED: '${AI_ENABLED:-false}' }
+  scheduler-service:
+    <<: *lms-service
+    build: { context: ., dockerfile: apps/backend/scheduler-service/Dockerfile }
+    environment: { NODE_ENV: production, PORT: 3012, SERVICE_NAME: scheduler-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
 
 volumes:
   mongo_data:
+
+networks:
+  lms:
