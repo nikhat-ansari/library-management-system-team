@@ -1,3 +1,50 @@
 @import 'tailwindcss';
 
 @theme { --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+
+@layer base {
+  body { @apply m-0 min-w-0 bg-slate-50 text-slate-950 antialiased; }
+  button, input { font: inherit; }
+}
+
+@layer components {
+  .auth-shell { @apply min-h-screen bg-slate-50 p-0 md:grid md:place-items-center md:p-6 lg:p-8; }
+  .auth-layout { @apply grid min-h-screen w-full overflow-hidden bg-white md:max-w-[68rem] md:grid-cols-[0.9fr_1.1fr] md:rounded-xl md:border md:border-slate-200/90 md:shadow-xl md:shadow-slate-950/8 lg:rounded-2xl; }
+  .auth-brand-panel { @apply flex flex-col justify-between bg-slate-900 px-6 py-7 text-slate-100 sm:px-10 sm:py-9 md:px-9 md:py-8 lg:px-11 lg:py-9; }
+  .auth-brand-content { @apply max-w-sm; }
+  .auth-wordmark { @apply text-base font-semibold tracking-[-0.015em] text-white; }
+  .auth-mobile-wordmark { @apply text-sm font-semibold tracking-tight; }
+  .auth-brand-intro { @apply mt-10 lg:mt-12; }
+  .auth-eyebrow { @apply text-xs font-semibold uppercase tracking-[0.16em] text-indigo-200; }
+  .auth-login-heading .auth-eyebrow { @apply text-indigo-700; }
+  .auth-brand-intro h1 { @apply mt-3 max-w-xs text-3xl font-semibold tracking-tight text-white sm:text-4xl; }
+  .auth-brand-intro > p:last-child { @apply mt-4 max-w-sm text-sm leading-6 text-slate-300; }
+  .auth-scope-list { @apply mt-7 grid gap-3 border-t border-white/15 pt-6 text-sm leading-5 text-slate-200; }
+  .auth-scope-list li { @apply flex items-center gap-3 before:h-1.5 before:w-1.5 before:shrink-0 before:rounded-full before:bg-indigo-300; }
+  .auth-brand-footer { @apply mt-8 max-w-sm text-xs leading-5 text-slate-400; }
+  .auth-login-panel { @apply flex items-center bg-white px-6 py-10 sm:px-12 sm:py-14 md:px-10 md:py-8 lg:px-14 lg:py-9; }
+  .auth-login-content { @apply mx-auto w-full max-w-sm; }
+  .auth-mobile-wordmark { @apply mb-12 text-slate-900 md:hidden; }
+  .auth-login-heading h2 { @apply mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]; }
+  .auth-login-heading > p:last-child { @apply mt-3 text-sm leading-6 text-slate-600; }
+  .auth-feedback { @apply min-h-0; }
+  .auth-alert { @apply mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm leading-5 text-red-800; }
+  .auth-form { @apply mt-7 space-y-5; }
+  .form-label { @apply mb-2 block text-sm font-medium text-slate-800; }
+  .form-input { @apply block min-h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-base text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-700 focus:ring-3 focus:ring-indigo-100; }
+  .form-input[aria-invalid='true'] { @apply border-red-500 focus:border-red-600 focus:ring-red-100; }
+  .field-error { @apply mt-2 text-sm leading-5 text-red-700; }
+  .password-toggle { @apply absolute inset-y-0 right-0 px-4 text-sm font-semibold text-indigo-700 transition-colors hover:text-indigo-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-indigo-700; }
+  .auth-submit { @apply inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-indigo-700 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-400; }
+
+  @media (min-width: 768px) {
+    .auth-layout { min-height: min(38rem, calc(100vh - 3rem)); }
+  }
+
+  @media (max-width: 639px) {
+    .auth-brand-panel { @apply px-6 py-7; }
+    .auth-brand-intro { @apply mt-8; }
+    .auth-brand-intro h1 { @apply text-2xl; }
+    .auth-brand-intro > p:last-child, .auth-scope-list, .auth-brand-footer { @apply hidden; }
+  }
+}

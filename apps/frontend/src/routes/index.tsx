@@ -1,10 +1,33 @@
-import { createBrowserRouter } from 'react-router-dom';
-import { ProtectedRoute } from './protected-route';
-
-const Placeholder = ({ title }: { title: string }) => <main className="p-6"><h1 className="text-2xl font-semibold">{title}</h1></main>;
+import { Navigate, createBrowserRouter } from 'react-router-dom';
+import { AccessDeniedPage } from '../features/auth/access-denied-page';
+import { LoginPage } from '../features/auth/login-page';
+import { RoleDashboardPage } from '../features/dashboard/role-dashboard-page';
+import { ProtectedRoute, PublicOnlyRoute } from './protected-route';
+import { RoleRedirect } from './role-redirect';
 
 export const router = createBrowserRouter([
-  { path: '/login', element: <Placeholder title="Library Management System" /> },
-  { path: '/forbidden', element: <Placeholder title="Access denied" /> },
-  { element: <ProtectedRoute />, children: [{ path: '/', element: <Placeholder title="Dashboard" /> }] },
+  {
+    element: <PublicOnlyRoute />,
+    children: [{ path: '/login', element: <LoginPage /> }],
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: '/', element: <RoleRedirect /> },
+      { path: '/forbidden', element: <AccessDeniedPage /> },
+      {
+        element: <ProtectedRoute roles={['ADMIN']} />,
+        children: [{ path: '/admin', element: <RoleDashboardPage role="ADMIN" /> }],
+      },
+      {
+        element: <ProtectedRoute roles={['STAFF']} />,
+        children: [{ path: '/librarian', element: <RoleDashboardPage role="STAFF" /> }],
+      },
+      {
+        element: <ProtectedRoute roles={['MEMBER']} />,
+        children: [{ path: '/member', element: <RoleDashboardPage role="MEMBER" /> }],
+      },
+    ],
+  },
+  { path: '*', element: <Navigate to="/" replace /> },
 ]);
