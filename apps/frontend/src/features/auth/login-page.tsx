@@ -19,8 +19,8 @@ function validate(email: string, password: string): FieldErrors {
 function authErrorMessage(error: unknown): string {
   if (error instanceof AuthError) {
     if (error.code === 'INVALID_CREDENTIALS') return 'The email or password is incorrect.';
-    if (error.code === 'ACCOUNT_INACTIVE') return 'This account is inactive or blocked. Please contact the library.';
     if (error.code === 'NETWORK_ERROR') return 'We could not reach the service. Please check your connection and try again.';
+    if (error.code === 'SERVER_ERROR') return 'The sign-in service is temporarily unavailable. Please try again shortly.';
   }
   return 'We could not sign you in. Please try again.';
 }

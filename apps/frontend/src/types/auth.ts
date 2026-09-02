@@ -1,8 +1,5 @@
-export const USER_ROLES = ['ADMIN', 'LIBRARIAN_STAFF', 'MEMBER'] as const;
+export const USER_ROLES = ['ADMIN', 'STAFF', 'MEMBER'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
-
-export const ACCOUNT_STATUSES = ['ACTIVE', 'INACTIVE', 'BLOCKED'] as const;
-export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 
 export interface LoginRequest {
   email: string;
@@ -10,19 +7,26 @@ export interface LoginRequest {
 }
 
 export interface AuthenticatedUser {
-  userId: string;
+  id: string;
   name: string;
-  email: string;
   role: UserRole;
-  accountStatus: AccountStatus;
 }
 
-export interface AuthResponse {
+export interface LoginResponse {
   user: AuthenticatedUser;
   accessToken: string;
 }
 
-export type AuthErrorCode = 'INVALID_CREDENTIALS' | 'ACCOUNT_INACTIVE' | 'NETWORK_ERROR' | 'UNEXPECTED_ERROR';
+export interface CurrentUser extends AuthenticatedUser {
+  email: string;
+  status: 'active' | 'inactive';
+  memberType?: string;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type AuthErrorCode = 'INVALID_CREDENTIALS' | 'NETWORK_ERROR' | 'SERVER_ERROR' | 'UNEXPECTED_ERROR';
 
 export class AuthError extends Error {
   constructor(public readonly code: AuthErrorCode) {

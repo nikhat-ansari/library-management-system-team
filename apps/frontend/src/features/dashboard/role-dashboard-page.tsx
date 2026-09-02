@@ -4,15 +4,15 @@ import type { UserRole } from '../../types/auth';
 
 const dashboardTitle: Record<UserRole, string> = {
   ADMIN: 'Admin dashboard',
-  LIBRARIAN_STAFF: 'Librarian dashboard',
+  STAFF: 'Librarian dashboard',
   MEMBER: 'Member dashboard',
 };
 
 export function RoleDashboardPage({ role }: { role: UserRole }) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const signOut = () => {
-    logout();
+  const signOut = async () => {
+    await logout();
     navigate('/login', { replace: true });
   };
 

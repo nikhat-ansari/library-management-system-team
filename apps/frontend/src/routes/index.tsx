@@ -20,8 +20,8 @@ export const router = createBrowserRouter([
         children: [{ path: '/admin', element: <RoleDashboardPage role="ADMIN" /> }],
       },
       {
-        element: <ProtectedRoute roles={['LIBRARIAN_STAFF']} />,
-        children: [{ path: '/librarian', element: <RoleDashboardPage role="LIBRARIAN_STAFF" /> }],
+        element: <ProtectedRoute roles={['STAFF']} />,
+        children: [{ path: '/librarian', element: <RoleDashboardPage role="STAFF" /> }],
       },
       {
         element: <ProtectedRoute roles={['MEMBER']} />,

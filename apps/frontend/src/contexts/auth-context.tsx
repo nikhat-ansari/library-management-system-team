@@ -8,14 +8,10 @@ import {
   type ReactNode,
 } from 'react';
 import { authService } from '../services/auth/auth-service';
-import {
-  clearStoredSession,
-  getStoredSession,
-  saveSession,
-} from '../services/auth/session-storage';
+import { clearStoredSession, getStoredAccessToken, saveAccessToken } from '../services/auth/session-storage';
 import type {
   AuthenticatedUser,
-  AuthResponse,
+  LoginResponse,
   LoginRequest,
   UserRole,
 } from '../types/auth';
@@ -25,8 +21,8 @@ type AuthStatus = 'checking' | 'unauthenticated' | 'authenticated';
 interface AuthContextValue {
   user: AuthenticatedUser | null;
   status: AuthStatus;
-  login: (request: LoginRequest) => Promise<AuthResponse>;
-  logout: () => void;
+  login: (request: LoginRequest) => Promise<LoginResponse>;
+  logout: () => Promise<void>;
   hasRole: (roles: readonly UserRole[]) => boolean;
 }
 
@@ -37,15 +33,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('checking');
 
   useEffect(() => {
-    const session = getStoredSession();
-    setUser(session?.user ?? null);
-    setStatus(session ? 'authenticated' : 'unauthenticated');
+    const restoreSession = async () => {
+      if (!getStoredAccessToken()) {
+        setStatus('unauthenticated');
+        return;
+      }
+      try {
+        const currentUser = await authService.getCurrentUser();
+        setUser(currentUser);
+        setStatus('authenticated');
+      } catch {
+        clearStoredSession();
+        setUser(null);
+        setStatus('unauthenticated');
+      }
+    };
+    void restoreSession();
   }, []);
 
   const login = useCallback(
-    async (request: LoginRequest): Promise<AuthResponse> => {
+    async (request: LoginRequest): Promise<LoginResponse> => {
       const response = await authService.login(request);
-      saveSession(response);
+      saveAccessToken(response.accessToken);
       setUser(response.user);
       setStatus('authenticated');
       return response;
@@ -53,10 +62,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const logout = useCallback(() => {
-    clearStoredSession();
-    setUser(null);
-    setStatus('unauthenticated');
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // The local session must be cleared even when the gateway is unavailable.
+    } finally {
+      clearStoredSession();
+      setUser(null);
+      setStatus('unauthenticated');
+    }
   }, []);
 
   const hasRole = useCallback(

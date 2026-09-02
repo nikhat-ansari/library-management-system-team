@@ -12,9 +12,8 @@ ENV NODE_ENV=production PORT=3002
 RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nestjs
 COPY package.json package-lock.json ./
 COPY apps/backend/user-service/package.json apps/backend/user-service/package.json
-RUN npm ci --omit=dev --workspace=@lms/user-service --include-workspace-root=false
+RUN npm ci --omit=dev
 COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/user-service/dist apps/backend/user-service/dist
 USER nestjs
 EXPOSE 3002
 CMD ["node", "apps/backend/user-service/dist/main.js"]
-

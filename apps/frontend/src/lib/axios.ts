@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { env } from '../config/env';
-import { getStoredAccessToken } from '../services/auth/session-storage';
+import { clearStoredSession, getStoredAccessToken } from '../services/auth/session-storage';
 
 export const apiClient = axios.create({ baseURL: env.apiBaseUrl });
 
@@ -12,5 +12,8 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  (error) => {
+    if (error.response?.status === 401) clearStoredSession();
+    return Promise.reject(error);
+  },
 );
