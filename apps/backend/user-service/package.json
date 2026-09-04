@@ -2,7 +2,7 @@
   "name": "@lms/user-service",
   "private": true,
   "version": "0.1.0",
-  "scripts": { "build": "tsc -p tsconfig.build.json", "start": "node dist/main.js", "start:dev": "ts-node src/main.ts", "typecheck": "tsc --noEmit" },
+  "scripts": { "build": "tsc -p tsconfig.build.json", "start": "node dist/main.js", "start:dev": "ts-node src/main.ts", "inspect:dev-db": "ts-node src/scripts/inspect-dev-database.ts", "reset:dev-users": "ts-node src/scripts/reset-dev-users.ts", "seed:dev-users": "ts-node src/scripts/seed-dev-users.ts", "typecheck": "tsc --noEmit" },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
     "@nestjs/config": "^4.0.0",

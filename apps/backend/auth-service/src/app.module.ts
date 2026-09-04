@@ -4,5 +4,5 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './health/health.module';
 import jwtConfig from './config/jwt.config';
 
-@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, load: [jwtConfig] }), AuthModule, HealthModule] })
+@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../../../.env'], load: [jwtConfig] }), AuthModule, HealthModule] })
 export class AppModule {}

@@ -27,6 +27,24 @@ export class UsersService {
     return this.toDto(user);
   }
 
+  async seedDevelopmentUser(createUserDto: CreateUserDto): Promise<void> {
+    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+    await this.userModel.findOneAndUpdate(
+      { email: createUserDto.email.toLowerCase() },
+      {
+        $set: {
+          passwordHash,
+          name: createUserDto.name,
+          role: createUserDto.role,
+          memberType: createUserDto.memberType,
+          status: 'active',
+        },
+        $setOnInsert: { tokenVersion: 0 },
+      },
+      { upsert: true, runValidators: true },
+    );
+  }
+
   async findByEmail(email: string): Promise<(UserDocument & { _id: { toString(): string } }) | null> {
     return this.userModel.findOne({ email: email.toLowerCase() });
   }

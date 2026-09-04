@@ -13,6 +13,9 @@
     "dev:frontend": "npm run dev --workspace=@lms/frontend",
     "dev:backend": "npm run start:dev --workspace=@lms/api-gateway",
     "dev:gateway": "npm run start:dev --workspace=@lms/api-gateway",
+    "backend": "docker compose --env-file .env up -d user-service auth-service api-gateway",
+    "backend:rebuild": "docker compose --env-file .env up -d --build --force-recreate user-service auth-service api-gateway",
+    "backend:stop": "docker compose stop user-service auth-service api-gateway",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
