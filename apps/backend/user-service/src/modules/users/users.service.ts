@@ -44,6 +44,14 @@ export class UsersService {
     return bcrypt.compare(plainPassword, hash);
   }
 
+  async getMemberDashboardCounts(): Promise<{ total: number; active: number }> {
+    const [total, active] = await Promise.all([
+      this.userModel.countDocuments({ role: 'MEMBER' }).exec(),
+      this.userModel.countDocuments({ role: 'MEMBER', status: 'active' }).exec(),
+    ]);
+    return { total, active };
+  }
+
   async invalidateTokens(id: string): Promise<boolean> {
     const result = await this.userModel.updateOne({ _id: id }, { $inc: { tokenVersion: 1 } });
     return result.matchedCount === 1;

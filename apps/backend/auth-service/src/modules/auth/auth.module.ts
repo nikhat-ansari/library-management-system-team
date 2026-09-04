@@ -20,6 +20,6 @@ import { UserServiceClient } from './user-service.client';
   ],
   providers: [JwtStrategy, AuthService, UserServiceClient],
   controllers: [AuthController],
-  exports: [JwtModule, PassportModule, AuthService],
+  exports: [JwtModule, PassportModule, AuthService, UserServiceClient],
 })
 export class AuthModule {}

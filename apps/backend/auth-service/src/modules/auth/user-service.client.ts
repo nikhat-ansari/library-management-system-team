@@ -68,6 +68,15 @@ export class UserServiceClient {
     }
   }
 
+  async getMemberDashboardCounts(): Promise<{ total: number; active: number }> {
+    try {
+      const response = await axios.get<{ total: number; active: number }>(`${this.userServiceUrl}/api/users/dashboard/member-counts`);
+      return response.data;
+    } catch {
+      throw new ServiceUnavailableException('User service is unavailable');
+    }
+  }
+
   async getAuthState(userId: string): Promise<AuthState | null> {
     try {
       const response = await axios.get<AuthState>(`${this.userServiceUrl}/api/users/${userId}/auth-state`);

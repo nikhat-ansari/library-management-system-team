@@ -2,7 +2,7 @@
   "name": "@lms/auth-service",
   "private": true,
   "version": "0.1.0",
-  "scripts": { "build": "tsc -p tsconfig.build.json", "start": "node dist/main.js", "start:dev": "ts-node src/main.ts", "typecheck": "tsc --noEmit" },
+  "scripts": { "build": "tsc -p tsconfig.build.json", "start": "node dist/main.js", "start:dev": "ts-node src/main.ts", "typecheck": "tsc --noEmit", "test:dashboard": "node --require ts-node/register --test src/modules/dashboard/dashboard.integration.test.ts" },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
     "@nestjs/config": "^4.0.0",
@@ -14,6 +14,7 @@
     "axios": "^1.6.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "mongoose": "^8.0.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",

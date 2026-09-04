@@ -29,6 +29,11 @@ export class UsersController {
     };
   }
 
+  @Get('dashboard/member-counts')
+  async getMemberDashboardCounts(): Promise<{ total: number; active: number }> {
+    return this.usersService.getMemberDashboardCounts();
+  }
+
   @Get(':id/auth-state')
   async getAuthState(@Param('id') userId: string): Promise<{ id: string; role: string; status: 'active' | 'inactive'; tokenVersion: number }> {
     const user = await this.usersService.getAuthState(userId);
