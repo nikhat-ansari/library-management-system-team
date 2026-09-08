@@ -7,7 +7,7 @@ x-lms-service: &lms-service
       condition: service_healthy
   environment:
     NODE_ENV: production
-    MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017}
+    MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/lms-users}
   networks:
     - lms
 
@@ -39,7 +39,7 @@ services:
       PORT: 3000
       SERVICE_NAME: api-gateway
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
-      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/lms-users}
       AUTH_SERVICE_URL: http://auth-service:3001
 
   auth-service:
@@ -49,15 +49,17 @@ services:
       NODE_ENV: production
       PORT: 3001
       SERVICE_NAME: auth-service
-      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/lms-users}
       JWT_SECRET: ${JWT_SECRET:-replace-with-a-long-random-secret}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
       USER_SERVICE_URL: http://user-service:3002
+      # Reads the same database named by MONGODB_URI unless explicitly overridden.
+      DASHBOARD_MONGODB_URI: ${DASHBOARD_MONGODB_URI:-${MONGODB_URI:-mongodb://mongodb:27017/lms-users}}
 
   user-service:
     <<: *lms-service
     build: { context: ., dockerfile: apps/backend/user-service/Dockerfile }
-    environment: { NODE_ENV: production, PORT: 3002, SERVICE_NAME: user-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}' }
+    environment: { NODE_ENV: production, PORT: 3002, SERVICE_NAME: user-service, MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017/lms-users}' }
   catalog-service:
     <<: *lms-service
     build: { context: ., dockerfile: apps/backend/catalog-service/Dockerfile }
