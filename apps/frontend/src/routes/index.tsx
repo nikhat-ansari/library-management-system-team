@@ -1,6 +1,7 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import { AccessDeniedPage } from '../features/auth/access-denied-page';
 import { LoginPage } from '../features/auth/login-page';
+import { AdminDashboardPage } from '../features/admin/admin-dashboard-page';
 import { RoleDashboardPage } from '../features/dashboard/role-dashboard-page';
 import { ProtectedRoute, PublicOnlyRoute } from './protected-route';
 import { RoleRedirect } from './role-redirect';
@@ -17,7 +18,9 @@ export const router = createBrowserRouter([
       { path: '/forbidden', element: <AccessDeniedPage /> },
       {
         element: <ProtectedRoute roles={['ADMIN']} />,
-        children: [{ path: '/admin', element: <RoleDashboardPage role="ADMIN" /> }],
+        children: [
+          { path: '/admin', element: <AdminDashboardPage /> },
+        ],
       },
       {
         element: <ProtectedRoute roles={['STAFF']} />,

@@ -53,8 +53,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-replace-with-a-long-random-secret}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
       USER_SERVICE_URL: http://user-service:3002
-      DASHBOARD_MONGODB_URI: ${DASHBOARD_MONGODB_URI:-${MONGODB_URI:-mongodb://mongodb:27017}}
-      DASHBOARD_DATABASE: ${DASHBOARD_DATABASE:-library_management}
+      # Reads the same database named by MONGODB_URI unless explicitly overridden.
+      DASHBOARD_MONGODB_URI: ${DASHBOARD_MONGODB_URI:-${MONGODB_URI:-mongodb://mongodb:27017/lms-users}}
 
   user-service:
     <<: *lms-service
