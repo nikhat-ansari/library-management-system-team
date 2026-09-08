@@ -1,1 +1,1 @@
-export enum UserRole { ADMIN = 'ADMIN', STAFF = 'STAFF', MEMBER = 'MEMBER' }
+export enum UserRole { ADMIN = 'ADMIN', LIBRARIAN_STAFF = 'LIBRARIAN_STAFF', MEMBER = 'MEMBER' }

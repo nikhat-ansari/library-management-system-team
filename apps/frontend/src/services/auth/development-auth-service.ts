@@ -11,7 +11,7 @@ interface DevelopmentUser {
 // Deprecated development fixture. It is intentionally not used by the application runtime.
 const developmentUsers: readonly DevelopmentUser[] = [
   { id: 'dev-admin-001', name: 'Avery Admin', email: 'admin@library.test', password: 'DevPassword123!', role: 'ADMIN' },
-  { id: 'dev-librarian-001', name: 'Logan Librarian', email: 'librarian@library.test', password: 'DevPassword123!', role: 'STAFF' },
+  { id: 'dev-librarian-001', name: 'Logan Librarian', email: 'librarian@library.test', password: 'DevPassword123!', role: 'LIBRARIAN_STAFF' },
   { id: 'dev-member-001', name: 'Morgan Member', email: 'member@library.test', password: 'DevPassword123!', role: 'MEMBER' },
 ];
 

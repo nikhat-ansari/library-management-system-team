@@ -11,7 +11,7 @@ export class CreateUserDto {
   @IsString()
   name!: string;
 
-  @IsEnum(['ADMIN', 'STAFF', 'MEMBER'])
+  @IsEnum(['ADMIN', 'LIBRARIAN_STAFF', 'MEMBER'])
   role!: string;
 
   @IsOptional()

@@ -12,11 +12,14 @@ interface UserData {
   lastLogin?: Date;
 }
 
+type AdminUserPayload = { name?: string; email?: string; role?: 'LIBRARIAN_STAFF'; status?: 'ACTIVE' | 'INACTIVE' };
+
 export interface AuthState {
   id: string;
   role: string;
   status: 'active' | 'inactive';
   tokenVersion: number;
+  permissions: string[];
 }
 
 @Injectable()
@@ -95,4 +98,13 @@ export class UserServiceClient {
       throw new ServiceUnavailableException('User service is unavailable');
     }
   }
+
+  async listManagedStaff(): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/managed-staff`)).data; }
+  async findManagedStaffById(id: string): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}`)).data; }
+  async createManagedStaff(payload: AdminUserPayload): Promise<any> { return (await axios.post(`${this.userServiceUrl}/api/users/admin/managed-staff`, payload)).data; }
+  async updateManagedStaff(id: string, payload: AdminUserPayload): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}`, payload)).data; }
+  async updateManagedStaffStatus(id: string, payload: AdminUserPayload): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/status`, payload)).data; }
+  async availableOperationalPermissions(): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/permissions`)).data; }
+  async getManagedStaffPermissions(id: string): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/permissions`)).data; }
+  async replaceManagedStaffPermissions(id: string, payload: { permissions: string[] }): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/permissions`, payload)).data; }
 }

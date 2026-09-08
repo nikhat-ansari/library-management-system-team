@@ -2,6 +2,8 @@ import { Controller, Get, Patch, Post, Query, Body, Param, BadRequestException, 
 import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UserDto } from './dto/user.dto';
+import { AdminUserResponseDto, CreateAdminUserDto, UpdateAdminUserDto, UpdateUserStatusDto } from './dto/admin-user.dto';
+import { ReplacePermissionsDto } from './dto/permissions.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -34,8 +36,61 @@ export class UsersController {
     return this.usersService.getMemberDashboardCounts();
   }
 
+  @Get('admin/managed-staff')
+  async findManagedStaff(): Promise<{ users: AdminUserResponseDto[] }> {
+    return { users: await this.usersService.findManagedStaff() };
+  }
+
+  @Post('admin/managed-staff')
+  async createManagedStaff(@Body() dto: CreateAdminUserDto): Promise<AdminUserResponseDto> {
+    return this.usersService.createManagedStaff(dto);
+  }
+
+  @Get('admin/managed-staff/:id')
+  async findManagedStaffById(@Param('id') id: string): Promise<AdminUserResponseDto> {
+    if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
+    const user = await this.usersService.findManagedStaffById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  @Patch('admin/managed-staff/:id')
+  async updateManagedStaff(@Param('id') id: string, @Body() dto: UpdateAdminUserDto): Promise<AdminUserResponseDto> {
+    if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
+    const user = await this.usersService.updateManagedStaff(id, dto);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  @Patch('admin/managed-staff/:id/status')
+  async updateManagedStaffStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto): Promise<AdminUserResponseDto> {
+    if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
+    const user = await this.usersService.updateManagedStaffStatus(id, dto);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  @Get('admin/permissions')
+  availablePermissions() { return { permissions: this.usersService.availablePermissions() }; }
+
+  @Get('admin/managed-staff/:id/permissions')
+  async getManagedStaffPermissions(@Param('id') id: string) {
+    if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
+    const permissions = await this.usersService.getManagedStaffPermissions(id);
+    if (!permissions) throw new NotFoundException('Librarian/staff user not found');
+    return { userId: id, permissions };
+  }
+
+  @Patch('admin/managed-staff/:id/permissions')
+  async replaceManagedStaffPermissions(@Param('id') id: string, @Body() dto: ReplacePermissionsDto) {
+    if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
+    const user = await this.usersService.replaceManagedStaffPermissions(id, dto.permissions);
+    if (!user) throw new NotFoundException('Librarian/staff user not found');
+    return { userId: id, ...user };
+  }
+
   @Get(':id/auth-state')
-  async getAuthState(@Param('id') userId: string): Promise<{ id: string; role: string; status: 'active' | 'inactive'; tokenVersion: number }> {
+  async getAuthState(@Param('id') userId: string): Promise<{ id: string; role: string; status: 'active' | 'inactive'; tokenVersion: number; permissions: string[] }> {
     const user = await this.usersService.getAuthState(userId);
     if (!user) throw new NotFoundException('User not found');
     return user;

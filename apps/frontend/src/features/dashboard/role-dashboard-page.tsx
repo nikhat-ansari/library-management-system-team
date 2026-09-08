@@ -4,7 +4,7 @@ import type { UserRole } from '../../types/auth';
 
 const dashboardTitle: Record<UserRole, string> = {
   ADMIN: 'Admin dashboard',
-  STAFF: 'Librarian dashboard',
+  LIBRARIAN_STAFF: 'Librarian dashboard',
   MEMBER: 'Member dashboard',
 };
 
