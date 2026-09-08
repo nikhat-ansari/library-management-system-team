@@ -1,0 +1,37 @@
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { adminUserManagementService, toStaffApiError } from '../../services/admin-user-management-service';
+import type { StaffApiError, StaffUser } from '../../types/admin-user-management';
+import { AdminLayout } from '../admin/admin-layout';
+import { StaffActionMenu } from './staff-action-menu';
+import { StaffStatusDialog } from './staff-status-dialog';
+import { formatDate, StaffIdentity, StaffPageHeader, StaffRoleBadge, StaffStatusBadge } from './staff-ui';
+
+function StaffListSkeleton() {
+  return <div className="divide-y divide-slate-100">{Array.from({ length: 6 }, (_, index) => <div key={index} className="grid grid-cols-[minmax(15rem,1.55fr)_minmax(9rem,0.85fr)_minmax(7rem,0.7fr)_7rem_2.5rem] items-center gap-4 px-6 py-4"><div className="h-10 animate-pulse rounded-lg bg-slate-100" /><div className="h-6 animate-pulse rounded-md bg-slate-100" /><div className="h-6 animate-pulse rounded-full bg-slate-100" /><div className="h-4 animate-pulse rounded bg-slate-100" /><div className="h-9 animate-pulse rounded-lg bg-slate-100" /></div>)}</div>;
+}
+
+function EmptyState() {
+  return <div className="px-6 py-16 text-center sm:py-20"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 text-xl font-medium text-indigo-700" aria-hidden="true">+</div><h2 className="mt-4 text-base font-semibold text-slate-950">No staff accounts yet</h2><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-600">Create the first librarian or staff account to give your team access to library operations.</p><Link to="/admin/users/new" className="mt-5 inline-flex min-h-10 items-center rounded-lg bg-indigo-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700">Add staff account</Link></div>;
+}
+
+function StaffCards({ staff, onStatus }: { staff: StaffUser[]; onStatus: (user: StaffUser) => void }) {
+  return <div className="grid gap-3 p-3 md:hidden">{staff.map((user) => <article key={user.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-3"><StaffIdentity staff={user} /><StaffActionMenu staff={user} onChangeStatus={onStatus} /></div><dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-slate-100 pt-4"><div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Role</dt><dd className="mt-1.5"><StaffRoleBadge role={user.role} /></dd></div><div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</dt><dd className="mt-1.5"><StaffStatusBadge status={user.accountStatus} /></dd></div><div className="col-span-2"><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Created</dt><dd className="mt-1.5 text-sm font-medium text-slate-700">{formatDate(user.createdAt)}</dd></div></dl></article>)}</div>;
+}
+
+export function StaffListPage() {
+  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState<StaffUser | null>(null);
+  const [statusError, setStatusError] = useState<StaffApiError>();
+  const query = useQuery({ queryKey: ['admin-users'], queryFn: adminUserManagementService.getStaff, retry: 1 });
+  const statusMutation = useMutation({
+    mutationFn: ({ id, accountStatus }: { id: string; accountStatus: StaffUser['accountStatus'] }) => adminUserManagementService.updateStatus(id, { accountStatus }),
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['admin-users'] }); setStatusError(undefined); },
+    onError: (error) => setStatusError(toStaffApiError(error, 'Staff account status could not be updated.')),
+  });
+  const changeStatus = async () => { if (!selected) return; await statusMutation.mutateAsync({ id: selected.id, accountStatus: selected.accountStatus === 'active' ? 'inactive' : 'active' }); };
+  const openStatus = (staff: StaffUser) => { setStatusError(undefined); setSelected(staff); };
+
+  return <AdminLayout><StaffPageHeader title="User Management" description="Create and manage librarian and staff accounts. Account history is preserved when access is deactivated." action={<Link to="/admin/users/new" className="inline-flex min-h-11 items-center justify-center rounded-lg bg-indigo-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700">Add staff</Link>} /><section className="mt-7 overflow-visible rounded-xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6"><div><h2 className="text-base font-semibold text-slate-950">Staff accounts</h2><p className="mt-1 text-sm text-slate-500">Librarian and staff access managed by administrators.</p></div>{query.isError && <button type="button" onClick={() => void query.refetch()} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-700">Retry</button>}</div>{query.isLoading ? <><div className="hidden md:block"><StaffListSkeleton /></div><div className="grid gap-3 p-3 md:hidden">{Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 animate-pulse rounded-xl bg-slate-100" />)}</div></> : query.isError ? <div className="p-5 sm:p-6"><div className="rounded-xl border border-red-200 bg-red-50 p-5"><p className="text-sm font-semibold text-red-950">Could not load staff accounts</p><p className="mt-1.5 text-sm leading-6 text-red-800">Please check your connection and try again. No account data has been changed.</p></div></div> : query.data?.length ? <><div className="hidden overflow-x-auto md:block"><table className="min-w-[760px] w-full table-fixed text-left"><thead className="bg-slate-50/80 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500"><tr><th className="w-[38%] px-6 py-3.5">Staff member</th><th className="w-[20%] px-4 py-3.5">Role</th><th className="w-[16%] px-4 py-3.5">Status</th><th className="w-[18%] px-4 py-3.5">Created</th><th className="w-[8%] px-4 py-3.5 text-right"><span className="sr-only">More actions</span></th></tr></thead><tbody className="divide-y divide-slate-100">{query.data.map((user) => <tr key={user.id} className="group transition-colors hover:bg-slate-50/80 focus-within:bg-indigo-50/40"><td className="px-6 py-4"><StaffIdentity staff={user} /></td><td className="px-4 py-4"><StaffRoleBadge role={user.role} /></td><td className="px-4 py-4"><StaffStatusBadge status={user.accountStatus} /></td><td className="px-4 py-4 text-sm font-medium text-slate-600">{formatDate(user.createdAt)}</td><td className="px-4 py-4 text-right"><StaffActionMenu staff={user} onChangeStatus={openStatus} /></td></tr>)}</tbody></table></div><StaffCards staff={query.data} onStatus={openStatus} /></> : <EmptyState />}</section>{selected && <StaffStatusDialog staff={selected} pending={statusMutation.isPending} error={statusError} onClose={() => { if (!statusMutation.isPending) setSelected(null); }} onConfirm={changeStatus} />}</AdminLayout>;
+}
