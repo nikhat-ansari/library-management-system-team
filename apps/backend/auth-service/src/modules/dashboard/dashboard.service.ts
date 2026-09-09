@@ -7,26 +7,18 @@ export class DashboardService {
   constructor(private readonly dashboardDataService: DashboardDataService) {}
 
   async getDashboard(): Promise<DashboardResponseDto> {
-    const { totalBooks, totalMembers, unavailableDependencies } = await this.dashboardDataService.getDashboardCounts();
+    const counts = await this.dashboardDataService.getDashboardCounts();
 
     return {
-      totalBooks,
-      totalMembers,
-      issuedBooks: null,
-      overdueBooks: null,
-      fineSummary: null,
-      reservationSummary: null,
-      seatUtilization: null,
+      totalBooks: counts.totalBooks,
+      totalMembers: counts.totalMembers,
+      issuedBooks: counts.issuedBooks,
+      overdueBooks: counts.overdueBooks,
+      fineSummary: counts.fineSummary,
+      reservationSummary: counts.reservationSummary,
+      seatUtilization: counts.seatUtilization,
       managementSummary: null,
       trendAlerts: [],
-      unavailableDependencies: [
-        ...unavailableDependencies,
-        'circulation collection and due-date rules',
-        'fine collection and payment rules',
-        'reservation collection and status rules',
-        'seat and seat-booking collections',
-        'AI management-summary and trend-alert provider',
-      ],
     };
   }
 }

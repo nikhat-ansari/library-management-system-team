@@ -15,15 +15,14 @@ export class AdminDashboardController {
     description: 'Read-only Admin Dashboard metric snapshot',
     schema: {
       type: 'object',
-      required: ['totalBooks', 'totalMembers', 'issuedBooks', 'overdueBooks', 'fineSummary', 'reservationSummary', 'seatUtilization', 'managementSummary', 'trendAlerts', 'unavailableDependencies'],
+      required: ['totalBooks', 'totalMembers', 'issuedBooks', 'overdueBooks', 'fineSummary', 'reservationSummary', 'seatUtilization', 'managementSummary', 'trendAlerts'],
       properties: {
-        totalBooks: { type: 'number' }, totalMembers: { type: 'number' }, issuedBooks: { type: 'number', nullable: true }, overdueBooks: { type: 'number', nullable: true },
-        fineSummary: { type: 'object', nullable: true, properties: { outstandingAmount: { type: 'number' }, pendingPayments: { type: 'number' } }, required: ['outstandingAmount', 'pendingPayments'] },
-        reservationSummary: { type: 'object', nullable: true, properties: { pending: { type: 'number' }, readyForPickup: { type: 'number' } }, required: ['pending', 'readyForPickup'] },
-        seatUtilization: { type: 'object', nullable: true, properties: { occupied: { type: 'number' }, total: { type: 'number' }, percentage: { type: 'number' } }, required: ['occupied', 'total', 'percentage'] },
+        totalBooks: { type: 'number' }, totalMembers: { type: 'number' }, issuedBooks: { type: 'number' }, overdueBooks: { type: 'number' },
+        fineSummary: { type: 'object', properties: { outstandingAmount: { type: 'number' }, pendingPayments: { type: 'number' } }, required: ['outstandingAmount', 'pendingPayments'] },
+        reservationSummary: { type: 'object', properties: { pending: { type: 'number' }, readyForPickup: { type: 'number' } }, required: ['pending', 'readyForPickup'] },
+        seatUtilization: { type: 'object', properties: { occupied: { type: 'number' }, total: { type: 'number' }, percentage: { type: 'number' } }, required: ['occupied', 'total', 'percentage'] },
         managementSummary: { type: 'object', nullable: true, properties: { content: { type: 'string' }, generatedAt: { type: 'string', format: 'date-time' } }, required: ['content', 'generatedAt'] },
         trendAlerts: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, title: { type: 'string' }, description: { type: 'string' }, severity: { type: 'string', enum: ['info', 'warning', 'critical'] } }, required: ['id', 'title', 'description', 'severity'] } },
-        unavailableDependencies: { type: 'array', items: { type: 'string' } },
       },
     },
   })

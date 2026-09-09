@@ -1,6 +1,7 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import { AccessDeniedPage } from '../features/auth/access-denied-page';
 import { LoginPage } from '../features/auth/login-page';
+import { AdminDashboardPage } from '../features/admin/admin-dashboard-page';
 import { RoleDashboardPage } from '../features/dashboard/role-dashboard-page';
 import { AdminDashboardPage } from '../features/admin/admin-dashboard-page';
 import { StaffCreatePage } from '../features/admin-user-management/staff-create-page';
@@ -24,10 +25,13 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute roles={['ADMIN']} />,
         children: [
           { path: '/admin', element: <AdminDashboardPage /> },
+<<<<<<< HEAD
           { path: '/admin/users', element: <StaffListPage /> },
           { path: '/admin/users/new', element: <StaffCreatePage /> },
           { path: '/admin/users/:staffId', element: <StaffDetailsPage /> },
           { path: '/admin/users/:staffId/edit', element: <StaffEditPage /> },
+=======
+>>>>>>> origin/main
         ],
       },
       {
