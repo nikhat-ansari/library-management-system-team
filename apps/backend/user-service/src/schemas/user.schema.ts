@@ -14,7 +14,7 @@ export class User {
   @Prop({ required: true })
   name!: string;
 
-  @Prop({ required: true, enum: ['ADMIN', 'STAFF', 'MEMBER'], default: 'MEMBER' })
+  @Prop({ required: true, enum: ['ADMIN', 'LIBRARIAN_STAFF', 'MEMBER'], default: 'MEMBER' })
   role!: string;
 
   @Prop({ enum: ['active', 'inactive'], default: 'active' })
@@ -28,6 +28,9 @@ export class User {
 
   @Prop({ default: 0 })
   tokenVersion!: number;
+
+  @Prop({ type: [String], default: [] })
+  permissions!: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

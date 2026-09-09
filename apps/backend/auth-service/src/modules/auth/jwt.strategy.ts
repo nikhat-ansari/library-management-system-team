@@ -20,11 +20,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<{ userId: string; role: string }> {
+  async validate(payload: JwtPayload): Promise<{ userId: string; role: string; permissions: string[] }> {
     const authState = await this.userServiceClient.getAuthState(payload.sub);
     if (!authState || authState.status !== 'active' || authState.tokenVersion !== payload.tokenVersion || authState.role !== payload.role) {
       throw new UnauthorizedException('Invalid or expired access token');
     }
-    return { userId: payload.sub, role: payload.role };
+    return { userId: payload.sub, role: payload.role, permissions: authState.permissions ?? [] };
   }
 }

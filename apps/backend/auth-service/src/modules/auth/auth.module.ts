@@ -6,6 +6,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserServiceClient } from './user-service.client';
+import { PermissionGuard } from '../../common/guards/permission.guard';
 
 @Module({
   imports: [
@@ -18,8 +19,8 @@ import { UserServiceClient } from './user-service.client';
       }),
     }),
   ],
-  providers: [JwtStrategy, AuthService, UserServiceClient],
+  providers: [JwtStrategy, AuthService, UserServiceClient, PermissionGuard],
   controllers: [AuthController],
-  exports: [JwtModule, PassportModule, AuthService, UserServiceClient],
+  exports: [JwtModule, PassportModule, AuthService, UserServiceClient, PermissionGuard],
 })
 export class AuthModule {}

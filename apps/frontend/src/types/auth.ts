@@ -1,4 +1,4 @@
-export const USER_ROLES = ['ADMIN', 'STAFF', 'MEMBER'] as const;
+export const USER_ROLES = ['ADMIN', 'LIBRARIAN_STAFF', 'MEMBER'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 export interface LoginRequest {
