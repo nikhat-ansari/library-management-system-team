@@ -7,14 +7,17 @@ import { DashboardVisualizations } from './dashboard-visualizations';
 type Metric = { title: string; value: string; detail: string };
 const number = (value: number) => new Intl.NumberFormat().format(value);
 function metrics(data: AdminDashboard): Metric[] {
+  const fineSummary = data.fineSummary ?? { outstandingAmount: 0, pendingPayments: 0 };
+  const reservationSummary = data.reservationSummary ?? { pending: 0, readyForPickup: 0 };
+  const seatUtilization = data.seatUtilization ?? { occupied: 0, total: 0, percentage: 0 };
   return [
     { title: 'Total books', value: number(data.totalBooks), detail: 'Official catalogue total' },
     { title: 'Total members', value: number(data.totalMembers), detail: 'Active and registered members' },
     { title: 'Issued books', value: number(data.issuedBooks), detail: 'Current circulation' },
     { title: 'Overdue books', value: number(data.overdueBooks), detail: 'Requires staff follow-up' },
-    { title: 'Outstanding fines', value: `₹${number(data.fineSummary.outstandingAmount)}`, detail: `${number(data.fineSummary.pendingPayments)} pending payments` },
-    { title: 'Reservations', value: number(data.reservationSummary.pending), detail: `${number(data.reservationSummary.readyForPickup)} ready for pickup` },
-    { title: 'Seat utilization', value: `${data.seatUtilization.percentage}%`, detail: `${number(data.seatUtilization.occupied)} of ${number(data.seatUtilization.total)} seats in use` },
+    { title: 'Outstanding fines', value: `₹${number(fineSummary.outstandingAmount)}`, detail: `${number(fineSummary.pendingPayments)} pending payments` },
+    { title: 'Reservations', value: number(reservationSummary.pending), detail: `${number(reservationSummary.readyForPickup)} ready for pickup` },
+    { title: 'Seat utilization', value: `${seatUtilization.percentage}%`, detail: `${number(seatUtilization.occupied)} of ${number(seatUtilization.total)} seats in use` },
   ];
 }
 function MetricCard({ metric, loading }: { metric: Metric; loading?: boolean }) {

@@ -2,7 +2,7 @@
   "name": "@lms/user-service",
   "private": true,
   "version": "0.1.0",
-  "scripts": { "build": "tsc -p tsconfig.build.json", "start": "node dist/main.js", "start:dev": "ts-node src/main.ts", "seed:atlas-admin": "ts-node src/scripts/seed-atlas-admin.ts", "typecheck": "tsc --noEmit" },
+  "scripts": { "build": "tsc -p tsconfig.build.json", "start": "node dist/main.js", "start:dev": "ts-node src/main.ts", "seed:atlas-admin": "ts-node src/scripts/seed-atlas-admin.ts", "seed:test-users": "ts-node src/scripts/seed-test-users.ts", "typecheck": "tsc --noEmit" },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
     "@nestjs/config": "^4.0.0",
