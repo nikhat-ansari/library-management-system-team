@@ -2,9 +2,6 @@ name: library-management-system
 
 x-lms-service: &lms-service
   restart: unless-stopped
-  depends_on:
-    mongodb:
-      condition: service_healthy
   environment:
     NODE_ENV: production
     MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/lms-users}
@@ -54,7 +51,7 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
       USER_SERVICE_URL: http://user-service:3002
       DASHBOARD_MONGODB_URI: ${DASHBOARD_MONGODB_URI:-${MONGODB_URI:-mongodb://mongodb:27017}}
-      DASHBOARD_DATABASE: ${DASHBOARD_DATABASE:-library_management}
+      DASHBOARD_DATABASE: ${DASHBOARD_DATABASE:-lms-users}
 
   user-service:
     <<: *lms-service
