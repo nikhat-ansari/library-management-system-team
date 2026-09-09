@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/auth-context';
 const navigation = [
   { label: 'Dashboard', to: '/admin' },
   { label: 'User Management', to: '/admin/users' },
-  { label: 'Permissions' }, { label: 'System Settings' }, { label: 'Reports' },
+  { label: 'Permissions', to: '/admin/permissions' }, { label: 'System Settings' }, { label: 'Reports' },
   { label: 'Audit Logs' }, { label: 'System Health' }, { label: 'AI Settings' },
 ];
 
