@@ -78,7 +78,7 @@ export class UsersController {
     if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
     const permissions = await this.usersService.getManagedStaffPermissions(id);
     if (!permissions) throw new NotFoundException('Librarian/staff user not found');
-    return { userId: id, permissions };
+    return permissions;
   }
 
   @Patch('admin/managed-staff/:id/permissions')
@@ -86,7 +86,7 @@ export class UsersController {
     if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
     const user = await this.usersService.replaceManagedStaffPermissions(id, dto.permissions);
     if (!user) throw new NotFoundException('Librarian/staff user not found');
-    return { userId: id, ...user };
+    return user;
   }
 
   @Get(':id/auth-state')
