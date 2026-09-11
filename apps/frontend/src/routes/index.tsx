@@ -3,6 +3,7 @@ import { AccessDeniedPage } from '../features/auth/access-denied-page';
 import { LoginPage } from '../features/auth/login-page';
 import { AdminDashboardPage } from '../features/admin/admin-dashboard-page';
 import { StaffPermissionsPage } from '../features/admin-permissions/staff-permissions-page';
+import { AdminSystemSettingsPage } from '../features/admin-system-settings/admin-system-settings-page';
 import { RoleDashboardPage } from '../features/dashboard/role-dashboard-page';
 import { StaffCreatePage } from '../features/admin-user-management/staff-create-page';
 import { StaffDetailsPage } from '../features/admin-user-management/staff-details-page';
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/admin', element: <AdminDashboardPage /> },
           { path: '/admin/permissions', element: <StaffPermissionsPage /> },
+          { path: '/admin/settings', element: <AdminSystemSettingsPage /> },
           { path: '/admin/users', element: <StaffListPage /> },
           { path: '/admin/users/new', element: <StaffCreatePage /> },
           { path: '/admin/users/:staffId', element: <StaffDetailsPage /> },

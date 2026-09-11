@@ -6,6 +6,7 @@ import jwtConfig from './config/jwt.config';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AdminUsersModule } from './modules/admin-users/admin-users.module';
 import { AdminPermissionsModule } from './modules/admin-permissions/admin-permissions.module';
+import { AdminSettingsModule } from './modules/admin-settings/admin-settings.module';
 
-@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, load: [jwtConfig] }), AuthModule, HealthModule, DashboardModule, AdminUsersModule, AdminPermissionsModule] })
+@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, load: [jwtConfig] }), AuthModule, HealthModule, DashboardModule, AdminUsersModule, AdminPermissionsModule, AdminSettingsModule] })
 export class AppModule {}

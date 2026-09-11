@@ -13,11 +13,13 @@
     "dev:frontend": "npm run dev --workspace=@lms/frontend",
     "dev:backend": "npm run start:dev --workspace=@lms/api-gateway",
     "dev:gateway": "npm run start:dev --workspace=@lms/api-gateway",
+    "dev:backend:all": "concurrently --names gateway,auth,users --prefix-colors blue,green,magenta \"npm run start:dev --workspace=@lms/api-gateway\" \"npm run start:dev --workspace=@lms/auth-service\" \"npm run start:dev --workspace=@lms/user-service\"",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
+    "concurrently": "^10.0.5",
     "prettier": "^3.5.3",
     "turbo": "^2.5.2",
     "typescript": "^5.8.3"

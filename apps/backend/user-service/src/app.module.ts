@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import databaseConfig from './config/database.config';
 import { UsersModule } from './modules/users/users.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 @Controller('health')
 class HealthController {
@@ -14,7 +15,7 @@ class HealthController {
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [databaseConfig] }),
     MongooseModule.forRoot(process.env.MONGODB_URI ?? 'mongodb://localhost:27017/lms-users'),
-    UsersModule,
+    UsersModule, SettingsModule,
   ],
   controllers: [HealthController],
 })
