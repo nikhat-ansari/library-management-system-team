@@ -2,13 +2,14 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { User, UserDocument } from '../../schemas/user.schema';
+import { OPERATIONAL_PERMISSION_CODES, OperationalPermissionCode, StaffPermission, StaffPermissionDocument } from '../../schemas/staff-permission.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { AdminUserResponseDto, CreateAdminUserDto, UpdateAdminUserDto, UpdateUserStatusDto } from './dto/admin-user.dto';
 
-export const OPERATIONAL_PERMISSIONS = [
+export const OPERATIONAL_PERMISSIONS: ReadonlyArray<{ code: OperationalPermissionCode; name: string; description: string }> = [
   { code: 'BOOK_MANAGEMENT', name: 'Book & Copy Management', description: 'Manage library titles and physical copies' },
   { code: 'MEMBER_MANAGEMENT', name: 'Member Management', description: 'Manage member accounts and operational member records' },
   { code: 'ISSUE_RETURN_RENEWAL', name: 'Issue / Return / Renewal', description: 'Process circulation transactions' },
@@ -17,13 +18,14 @@ export const OPERATIONAL_PERMISSIONS = [
   { code: 'SHELF_MANAGEMENT', name: 'Shelf Management', description: 'Manage library shelves' },
   { code: 'SEAT_MANAGEMENT', name: 'Seat Management', description: 'Manage seats and staff-assisted seat bookings' },
   { code: 'OPERATIONAL_REPORT_ACCESS', name: 'Operational Reports', description: 'Access operational library reports' },
-] as const;
-
-export type OperationalPermissionCode = (typeof OPERATIONAL_PERMISSIONS)[number]['code'];
+];
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(StaffPermission.name) private staffPermissionModel: Model<StaffPermissionDocument>,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
     const saltRounds = 10;
@@ -74,27 +76,48 @@ export class UsersService {
   }
 
   async getAuthState(id: string): Promise<{ id: string; role: string; status: 'active' | 'inactive'; tokenVersion: number; permissions: string[] } | null> {
-    const user = await this.userModel.findById(id).select('role status tokenVersion permissions');
+    const user = await this.userModel.findById(id).select('role status tokenVersion');
     if (!user) return null;
-    return { id: user._id.toString(), role: user.role, status: user.status, tokenVersion: user.tokenVersion ?? 0, permissions: user.permissions ?? [] };
+    const permissions = user.role === 'LIBRARIAN_STAFF'
+      ? await this.allowedPermissionCodes(user._id.toString())
+      : [];
+    return { id: user._id.toString(), role: user.role, status: user.status, tokenVersion: user.tokenVersion ?? 0, permissions };
   }
 
   availablePermissions() { return OPERATIONAL_PERMISSIONS; }
 
-  async getManagedStaffPermissions(id: string): Promise<string[] | null> {
+  async getManagedStaffPermissions(id: string): Promise<{ userId: string; permissions: OperationalPermissionCode[] } | null> {
     if (!isValidObjectId(id)) return null;
-    const user = await this.userModel.findOne({ _id: id, role: 'LIBRARIAN_STAFF' }).select('permissions').exec();
-    return user ? [...new Set(user.permissions ?? [])] : null;
+    const user = await this.userModel.findOne({ _id: id, role: 'LIBRARIAN_STAFF' }).select('_id').exec();
+    if (!user) return null;
+    return { userId: user._id.toString(), permissions: await this.allowedPermissionCodes(user._id.toString()) };
   }
 
-  async replaceManagedStaffPermissions(id: string, permissions: OperationalPermissionCode[]): Promise<{ permissions: string[]; updatedAt: Date } | null> {
+  async replaceManagedStaffPermissions(id: string, permissions: OperationalPermissionCode[]): Promise<{ userId: string; permissions: OperationalPermissionCode[] } | null> {
     if (!isValidObjectId(id)) return null;
-    const user = await this.userModel.findOneAndUpdate(
-      { _id: id, role: 'LIBRARIAN_STAFF' },
-      { $set: { permissions: [...new Set(permissions)] } },
-      { new: true, runValidators: true },
-    ).exec();
-    return user ? { permissions: [...new Set(user.permissions ?? [])], updatedAt: (user as any).updatedAt } : null;
+    const user = await this.userModel.findOne({ _id: id, role: 'LIBRARIAN_STAFF' }).select('_id').exec();
+    if (!user) return null;
+    const allowed = new Set(permissions);
+    await this.staffPermissionModel.bulkWrite(
+      OPERATIONAL_PERMISSION_CODES.map((permissionKey) => ({
+        updateOne: {
+          filter: { staffUserId: user._id.toString(), permissionKey },
+          update: {
+            $set: { allowed: allowed.has(permissionKey) },
+            $setOnInsert: { staffUserId: user._id.toString(), permissionKey },
+          },
+          upsert: true,
+        },
+      })),
+      { ordered: true },
+    );
+    return { userId: user._id.toString(), permissions: await this.allowedPermissionCodes(user._id.toString()) };
+  }
+
+  private async allowedPermissionCodes(staffUserId: string): Promise<OperationalPermissionCode[]> {
+    const mappings = await this.staffPermissionModel.find({ staffUserId, allowed: true }).select('permissionKey -_id').lean().exec();
+    const allowed = new Set(mappings.map((mapping) => mapping.permissionKey));
+    return OPERATIONAL_PERMISSION_CODES.filter((code) => allowed.has(code));
   }
 
   async findManagedStaff(): Promise<AdminUserResponseDto[]> {
