@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Post, Query, Body, Param, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Query, Body, Param, BadRequestException, NotFoundException, Headers, UnauthorizedException } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UserDto } from './dto/user.dto';
@@ -9,6 +9,8 @@ import { ReplacePermissionsDto } from './dto/permissions.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  private actorId(actorId?: string): string { if (!actorId) throw new UnauthorizedException('Internal authenticated actor is required'); return actorId; }
 
   @Get('by-email')
   async findByEmail(@Query('email') email: string): Promise<any> {
@@ -42,8 +44,8 @@ export class UsersController {
   }
 
   @Post('admin/managed-staff')
-  async createManagedStaff(@Body() dto: CreateAdminUserDto): Promise<AdminUserResponseDto> {
-    return this.usersService.createManagedStaff(dto);
+  async createManagedStaff(@Body() dto: CreateAdminUserDto, @Headers('x-audit-actor-id') actorId?: string): Promise<AdminUserResponseDto> {
+    return this.usersService.createManagedStaff(dto, this.actorId(actorId));
   }
 
   @Get('admin/managed-staff/:id')
@@ -55,17 +57,17 @@ export class UsersController {
   }
 
   @Patch('admin/managed-staff/:id')
-  async updateManagedStaff(@Param('id') id: string, @Body() dto: UpdateAdminUserDto): Promise<AdminUserResponseDto> {
+  async updateManagedStaff(@Param('id') id: string, @Body() dto: UpdateAdminUserDto, @Headers('x-audit-actor-id') actorId?: string): Promise<AdminUserResponseDto> {
     if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
-    const user = await this.usersService.updateManagedStaff(id, dto);
+    const user = await this.usersService.updateManagedStaff(id, dto, this.actorId(actorId));
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
   @Patch('admin/managed-staff/:id/status')
-  async updateManagedStaffStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto): Promise<AdminUserResponseDto> {
+  async updateManagedStaffStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto, @Headers('x-audit-actor-id') actorId?: string): Promise<AdminUserResponseDto> {
     if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
-    const user = await this.usersService.updateManagedStaffStatus(id, dto);
+    const user = await this.usersService.updateManagedStaffStatus(id, dto, this.actorId(actorId));
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
@@ -82,9 +84,9 @@ export class UsersController {
   }
 
   @Patch('admin/managed-staff/:id/permissions')
-  async replaceManagedStaffPermissions(@Param('id') id: string, @Body() dto: ReplacePermissionsDto) {
+  async replaceManagedStaffPermissions(@Param('id') id: string, @Body() dto: ReplacePermissionsDto, @Headers('x-audit-actor-id') actorId?: string) {
     if (!/^[a-fA-F0-9]{24}$/.test(id)) throw new BadRequestException('Invalid user ID');
-    const user = await this.usersService.replaceManagedStaffPermissions(id, dto.permissions);
+    const user = await this.usersService.replaceManagedStaffPermissions(id, dto.permissions, this.actorId(actorId));
     if (!user) throw new NotFoundException('Librarian/staff user not found');
     return user;
   }

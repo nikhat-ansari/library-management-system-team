@@ -5,6 +5,7 @@ import { AdminDashboardPage } from '../features/admin/admin-dashboard-page';
 import { StaffPermissionsPage } from '../features/admin-permissions/staff-permissions-page';
 import { AdminSystemSettingsPage } from '../features/admin-system-settings/admin-system-settings-page';
 import { AdminReportsPage } from '../features/admin-reports/admin-reports-page';
+import { AdminAuditLogsPage } from '../features/admin-audit-logs/admin-audit-logs-page';
 import { RoleDashboardPage } from '../features/dashboard/role-dashboard-page';
 import { StaffCreatePage } from '../features/admin-user-management/staff-create-page';
 import { StaffDetailsPage } from '../features/admin-user-management/staff-details-page';
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
           { path: '/admin/permissions', element: <StaffPermissionsPage /> },
           { path: '/admin/settings', element: <AdminSystemSettingsPage /> },
           { path: '/admin/reports', element: <AdminReportsPage /> },
+          { path: '/admin/audit-logs', element: <AdminAuditLogsPage /> },
           { path: '/admin/users', element: <StaffListPage /> },
           { path: '/admin/users/new', element: <StaffCreatePage /> },
           { path: '/admin/users/:staffId', element: <StaffDetailsPage /> },

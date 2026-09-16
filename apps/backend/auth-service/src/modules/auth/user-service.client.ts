@@ -101,10 +101,11 @@ export class UserServiceClient {
 
   async listManagedStaff(): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/managed-staff`)).data; }
   async findManagedStaffById(id: string): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}`)).data; }
-  async createManagedStaff(payload: AdminUserPayload): Promise<any> { return (await axios.post(`${this.userServiceUrl}/api/users/admin/managed-staff`, payload)).data; }
-  async updateManagedStaff(id: string, payload: AdminUserPayload): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}`, payload)).data; }
-  async updateManagedStaffStatus(id: string, payload: AdminUserPayload): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/status`, payload)).data; }
+  private auditHeaders(actorId: string) { return { headers: { 'x-audit-actor-id': actorId } }; }
+  async createManagedStaff(payload: AdminUserPayload, actorId: string): Promise<any> { return (await axios.post(`${this.userServiceUrl}/api/users/admin/managed-staff`, payload, this.auditHeaders(actorId))).data; }
+  async updateManagedStaff(id: string, payload: AdminUserPayload, actorId: string): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}`, payload, this.auditHeaders(actorId))).data; }
+  async updateManagedStaffStatus(id: string, payload: AdminUserPayload, actorId: string): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/status`, payload, this.auditHeaders(actorId))).data; }
   async availableOperationalPermissions(): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/permissions`)).data; }
   async getManagedStaffPermissions(id: string): Promise<any> { return (await axios.get(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/permissions`)).data; }
-  async replaceManagedStaffPermissions(id: string, payload: { permissions: string[] }): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/permissions`, payload)).data; }
+  async replaceManagedStaffPermissions(id: string, payload: { permissions: string[] }, actorId: string): Promise<any> { return (await axios.patch(`${this.userServiceUrl}/api/users/admin/managed-staff/${id}/permissions`, payload, this.auditHeaders(actorId))).data; }
 }

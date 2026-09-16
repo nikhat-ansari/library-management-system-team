@@ -6,7 +6,7 @@ const navigation = [
   { label: 'Dashboard', to: '/admin' },
   { label: 'User Management', to: '/admin/users' },
   { label: 'Permissions', to: '/admin/permissions' }, { label: 'System Settings', to: '/admin/settings' }, { label: 'Reports', to: '/admin/reports' },
-  { label: 'Audit Logs' }, { label: 'System Health' }, { label: 'AI Settings' },
+  { label: 'Audit Logs', to: '/admin/audit-logs' }, { label: 'System Health' }, { label: 'AI Settings' },
 ];
 
 export function AdminLayout({ children }: { children: ReactNode }) {

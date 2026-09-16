@@ -24,23 +24,26 @@ test('staff permissions default to denied and persist a complete mapping on repl
       operations.forEach(({ updateOne }) => mappings.set(updateOne.filter.permissionKey, updateOne.update.$set.allowed));
     },
   };
-  const service = new UsersService(userModel as any, permissionModel as any);
+  const entries: unknown[] = [];
+  const audit = { create: async (entry: unknown) => { entries.push(entry); } };
+  const service = new UsersService(userModel as any, permissionModel as any, audit as any);
 
   assert.deepEqual(await service.getManagedStaffPermissions(staffId.toString()), {
     userId: staffId.toString(), permissions: [],
   });
 
-  const saved = await service.replaceManagedStaffPermissions(staffId.toString(), ['BOOK_MANAGEMENT', 'SEAT_MANAGEMENT']);
+  const saved = await service.replaceManagedStaffPermissions(staffId.toString(), ['BOOK_MANAGEMENT', 'SEAT_MANAGEMENT'], 'admin-id');
   assert.deepEqual(saved, {
     userId: staffId.toString(), permissions: ['BOOK_MANAGEMENT', 'SEAT_MANAGEMENT'],
   });
   assert.equal(mappings.size, OPERATIONAL_PERMISSION_CODES.length);
   assert.equal(mappings.get('BOOK_MANAGEMENT'), true);
   assert.equal(mappings.get('MEMBER_MANAGEMENT'), false);
+  assert.deepEqual(entries, [{ actorId: 'admin-id', action: 'PERMISSIONS_CHANGED', module: 'PERMISSIONS', recordReference: { id: staffId.toString(), type: 'USER' }, oldChangeSummary: { permissions: null }, newChangeSummary: { permissions: 'BOOK_MANAGEMENT, SEAT_MANAGEMENT' } }]);
 });
 
 test('an invalid staff identifier is rejected without querying persistence', async () => {
-  const service = new UsersService({ findOne: () => { throw new Error('must not query'); } } as any, {} as any);
+  const service = new UsersService({ findOne: () => { throw new Error('must not query'); } } as any, {} as any, {} as any);
   assert.equal(await service.getManagedStaffPermissions('not-an-object-id'), null);
-  assert.equal(await service.replaceManagedStaffPermissions('not-an-object-id', []), null);
+  assert.equal(await service.replaceManagedStaffPermissions('not-an-object-id', [], 'admin-id'), null);
 });
