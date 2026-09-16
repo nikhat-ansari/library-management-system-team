@@ -8,6 +8,7 @@ import { UserDto } from './dto/user.dto';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { AdminUserResponseDto, CreateAdminUserDto, UpdateAdminUserDto, UpdateUserStatusDto } from './dto/admin-user.dto';
+import { AuditService } from '../audit/audit.service';
 
 export const OPERATIONAL_PERMISSIONS: ReadonlyArray<{ code: OperationalPermissionCode; name: string; description: string }> = [
   { code: 'BOOK_MANAGEMENT', name: 'Book & Copy Management', description: 'Manage library titles and physical copies' },
@@ -25,6 +26,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(StaffPermission.name) private staffPermissionModel: Model<StaffPermissionDocument>,
+    private readonly audit: AuditService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
@@ -93,10 +95,11 @@ export class UsersService {
     return { userId: user._id.toString(), permissions: await this.allowedPermissionCodes(user._id.toString()) };
   }
 
-  async replaceManagedStaffPermissions(id: string, permissions: OperationalPermissionCode[]): Promise<{ userId: string; permissions: OperationalPermissionCode[] } | null> {
+  async replaceManagedStaffPermissions(id: string, permissions: OperationalPermissionCode[], actorId: string): Promise<{ userId: string; permissions: OperationalPermissionCode[] } | null> {
     if (!isValidObjectId(id)) return null;
     const user = await this.userModel.findOne({ _id: id, role: 'LIBRARIAN_STAFF' }).select('_id').exec();
     if (!user) return null;
+    const oldPermissions = await this.allowedPermissionCodes(user._id.toString());
     const allowed = new Set(permissions);
     await this.staffPermissionModel.bulkWrite(
       OPERATIONAL_PERMISSION_CODES.map((permissionKey) => ({
@@ -111,7 +114,9 @@ export class UsersService {
       })),
       { ordered: true },
     );
-    return { userId: user._id.toString(), permissions: await this.allowedPermissionCodes(user._id.toString()) };
+    const newPermissions = await this.allowedPermissionCodes(user._id.toString());
+    await this.audit.create({ actorId, action: 'PERMISSIONS_CHANGED', module: 'PERMISSIONS', recordReference: { id: user._id.toString(), type: 'USER' }, oldChangeSummary: { permissions: oldPermissions.join(', ') || null }, newChangeSummary: { permissions: newPermissions.join(', ') || null } });
+    return { userId: user._id.toString(), permissions: newPermissions };
   }
 
   private async allowedPermissionCodes(staffUserId: string): Promise<OperationalPermissionCode[]> {
@@ -131,7 +136,7 @@ export class UsersService {
     return user ? this.toAdminDto(user) : null;
   }
 
-  async createManagedStaff(dto: CreateAdminUserDto): Promise<AdminUserResponseDto> {
+  async createManagedStaff(dto: CreateAdminUserDto, actorId: string): Promise<AdminUserResponseDto> {
     try {
       const user = await this.userModel.create({
         name: dto.name.trim(),
@@ -142,6 +147,29 @@ export class UsersService {
         status: 'active',
         tokenVersion: 0,
       });
+      const result = this.toAdminDto(user);
+      await this.audit.create({ actorId, action: 'USER_CREATED', module: 'USER_MANAGEMENT', recordReference: { id: result.id, type: 'USER' }, newChangeSummary: { name: result.name, email: result.email, role: result.role, status: result.status } });
+      return result;
+    } catch (error: any) {
+      if (error?.code === 11000) throw new ConflictException('Email already exists');
+      throw error;
+    }
+  }
+
+  async updateManagedStaff(id: string, dto: UpdateAdminUserDto, actorId: string): Promise<AdminUserResponseDto | null> {
+    if (!isValidObjectId(id)) return null;
+    const update: Record<string, string> = {};
+    if (dto.name !== undefined) update.name = dto.name.trim();
+    if (dto.email !== undefined) update.email = dto.email.trim().toLowerCase();
+    if (dto.role !== undefined) update.role = 'LIBRARIAN_STAFF';
+    const existing = await this.userModel.findOne({ _id: id, role: 'LIBRARIAN_STAFF' }).exec();
+    if (!existing) return null;
+    try {
+      const user = await this.userModel.findOneAndUpdate({ _id: id, role: 'LIBRARIAN_STAFF' }, update, { new: true, runValidators: true }).exec();
+      if (!user) return null;
+      const oldSummary: Record<string, string> = {}; const newSummary: Record<string, string> = {};
+      for (const key of ['name', 'email'] as const) if (update[key] !== undefined && existing[key] !== user[key]) { oldSummary[key] = existing[key]; newSummary[key] = user[key]; }
+      if (Object.keys(newSummary).length > 0) await this.audit.create({ actorId, action: 'USER_UPDATED', module: 'USER_MANAGEMENT', recordReference: { id, type: 'USER' }, oldChangeSummary: oldSummary, newChangeSummary: newSummary });
       return this.toAdminDto(user);
     } catch (error: any) {
       if (error?.code === 11000) throw new ConflictException('Email already exists');
@@ -149,23 +177,10 @@ export class UsersService {
     }
   }
 
-  async updateManagedStaff(id: string, dto: UpdateAdminUserDto): Promise<AdminUserResponseDto | null> {
+  async updateManagedStaffStatus(id: string, dto: UpdateUserStatusDto, actorId: string): Promise<AdminUserResponseDto | null> {
     if (!isValidObjectId(id)) return null;
-    const update: Record<string, string> = {};
-    if (dto.name !== undefined) update.name = dto.name.trim();
-    if (dto.email !== undefined) update.email = dto.email.trim().toLowerCase();
-    if (dto.role !== undefined) update.role = 'LIBRARIAN_STAFF';
-    try {
-      const user = await this.userModel.findOneAndUpdate({ _id: id, role: 'LIBRARIAN_STAFF' }, update, { new: true, runValidators: true }).exec();
-      return user ? this.toAdminDto(user) : null;
-    } catch (error: any) {
-      if (error?.code === 11000) throw new ConflictException('Email already exists');
-      throw error;
-    }
-  }
-
-  async updateManagedStaffStatus(id: string, dto: UpdateUserStatusDto): Promise<AdminUserResponseDto | null> {
-    if (!isValidObjectId(id)) return null;
+    const existing = await this.userModel.findOne({ _id: id, role: 'LIBRARIAN_STAFF' }).select('status').exec();
+    if (!existing) return null;
     const user = await this.userModel.findOneAndUpdate(
       { _id: id, role: 'LIBRARIAN_STAFF' },
       // Invalidate any token issued before a status change. This prevents a
@@ -173,7 +188,9 @@ export class UsersService {
       { $set: { status: dto.status.toLowerCase() }, $inc: { tokenVersion: 1 } },
       { new: true, runValidators: true },
     ).exec();
-    return user ? this.toAdminDto(user) : null;
+    if (!user) return null;
+    if (existing.status !== user.status) await this.audit.create({ actorId, action: 'USER_STATUS_CHANGED', module: 'USER_MANAGEMENT', recordReference: { id, type: 'USER' }, oldChangeSummary: { status: existing.status === 'active' ? 'ACTIVE' : 'INACTIVE' }, newChangeSummary: { status: user.status === 'active' ? 'ACTIVE' : 'INACTIVE' } });
+    return this.toAdminDto(user);
   }
 
   private toDto(user: UserDocument): UserDto {

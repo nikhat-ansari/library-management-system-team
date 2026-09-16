@@ -5,6 +5,7 @@ import { JwtGuard } from '../../common/guards/jwt.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { AdminUsersService } from './admin-users.service';
 import { AdminUserResponseDto, CreateAdminUserDto, UpdateAdminUserDto, UpdateUserStatusDto } from './dto/admin-user.dto';
+import { CurrentUser } from '../../common/decorators/auth-user.decorator';
 
 @ApiTags('admin-users')
 @ApiBearerAuth()
@@ -23,7 +24,7 @@ export class AdminUsersController {
   @Post()
   @ApiOperation({ summary: 'Create a librarian/staff account', description: 'Requires an authenticated ADMIN user. Credentials are generated securely and are never returned.' })
   @ApiCreatedResponse({ type: AdminUserResponseDto }) @ApiBadRequestResponse() @ApiConflictResponse({ description: 'Email already exists' }) @ApiUnauthorizedResponse() @ApiForbiddenResponse()
-  create(@Body() dto: CreateAdminUserDto): Promise<AdminUserResponseDto> { return this.service.create(dto); }
+  create(@Body() dto: CreateAdminUserDto, @CurrentUser() user: { userId: string }): Promise<AdminUserResponseDto> { return this.service.create(dto, user.userId); }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a librarian/staff account', description: 'Requires an authenticated ADMIN user.' }) @ApiParam({ name: 'id' })
@@ -33,11 +34,11 @@ export class AdminUsersController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update a librarian/staff account', description: 'Requires an authenticated ADMIN user.' }) @ApiParam({ name: 'id' })
   @ApiOkResponse({ type: AdminUserResponseDto }) @ApiBadRequestResponse() @ApiNotFoundResponse() @ApiConflictResponse() @ApiUnauthorizedResponse() @ApiForbiddenResponse()
-  update(@Param('id') id: string, @Body() dto: UpdateAdminUserDto): Promise<AdminUserResponseDto> { return this.service.update(id, dto); }
+  update(@Param('id') id: string, @Body() dto: UpdateAdminUserDto, @CurrentUser() user: { userId: string }): Promise<AdminUserResponseDto> { return this.service.update(id, dto, user.userId); }
 
   @Patch(':id/status')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Activate or deactivate a librarian/staff account', description: 'Requires an authenticated ADMIN user.' }) @ApiParam({ name: 'id' })
   @ApiOkResponse({ type: AdminUserResponseDto }) @ApiBadRequestResponse() @ApiNotFoundResponse() @ApiUnauthorizedResponse() @ApiForbiddenResponse()
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto): Promise<AdminUserResponseDto> { return this.service.updateStatus(id, dto); }
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto, @CurrentUser() user: { userId: string }): Promise<AdminUserResponseDto> { return this.service.updateStatus(id, dto, user.userId); }
 }
