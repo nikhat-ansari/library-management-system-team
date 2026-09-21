@@ -25,7 +25,8 @@ describe('Module 6 report contracts and exports', () => {
     assert.equal(xlsx.contentType, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); assert.equal(xlsx.data.subarray(0, 2).toString('ascii'), 'PK'); assert.match(xlsx.filename, /\.xlsx$/);
     assert.equal(pdf.contentType, 'application/pdf'); assert.equal(pdf.data.subarray(0, 5).toString('ascii'), '%PDF-'); assert.match(pdf.filename, /\.pdf$/);
   });
-  it('returns a controlled 503 for a valid AI request', () => {
-    assert.throws(() => new AiAdminReportsController().summary(Object.assign(new AiReportSummaryDto(), { reportType: 'members' })), (error: unknown) => error instanceof HttpException && error.getStatus() === 503);
+  it('returns a controlled 503 for a valid AI request after checking persisted AI availability', async () => {
+    const controller = new AiAdminReportsController({ assertEnabled: async () => undefined } as never);
+    await assert.rejects(() => controller.summary(Object.assign(new AiReportSummaryDto(), { reportType: 'members' })), (error: unknown) => error instanceof HttpException && error.getStatus() === 503);
   });
 });

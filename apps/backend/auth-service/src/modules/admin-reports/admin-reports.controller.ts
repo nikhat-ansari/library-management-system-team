@@ -7,6 +7,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { AiReportSummaryDto, ExportReportQueryDto, ReportQueryDto } from './dto/report-query.dto';
 import { ReportsDataService } from './reports-data.service';
 import { ReportsExportService } from './reports-export.service';
+import { AiAvailabilityService } from '../system-health/ai-availability.service';
 
 @ApiTags('admin-reports') @ApiBearerAuth() @Controller('admin/reports') @UseGuards(JwtGuard, RolesGuard) @Roles('ADMIN')
 export class AdminReportsController {
@@ -21,6 +22,7 @@ export class AdminReportsController {
 
 @ApiTags('ai-reports') @ApiBearerAuth() @Controller('ai/admin/reports') @UseGuards(JwtGuard, RolesGuard) @Roles('ADMIN')
 export class AiAdminReportsController {
+  constructor(private readonly aiAvailability: AiAvailabilityService) {}
   @Post('summary') @ApiOperation({ summary: 'Optional AI trend summary for an official filtered report' }) @ApiOkResponse() @ApiUnauthorizedResponse() @ApiForbiddenResponse()
-  summary(@Body() _query: AiReportSummaryDto) { throw new ServiceUnavailableException({ available: false, message: 'AI report summaries are not configured. Official reports remain available.' }); }
+  async summary(@Body() _query: AiReportSummaryDto) { await this.aiAvailability.assertEnabled(); throw new ServiceUnavailableException({ available: false, reason: 'not_configured', message: 'AI report summaries are not configured. Official reports remain available.' }); }
 }

@@ -8,8 +8,9 @@ import { AdminPermissionsModule } from './modules/admin-permissions/admin-permis
 import { AdminSettingsModule } from './modules/admin-settings/admin-settings.module';
 import { AdminReportsModule } from './modules/admin-reports/admin-reports.module';
 import { AdminAuditModule } from './modules/admin-audit/admin-audit.module';
+import { SystemHealthModule } from './modules/system-health/system-health.module';
 
 @Module({
-  imports: [HealthModule, AuthModule, UsersModule, AdminDashboardModule, AdminUsersModule, AdminPermissionsModule, AdminSettingsModule, AdminReportsModule, AdminAuditModule],
+  imports: [HealthModule, AuthModule, UsersModule, AdminDashboardModule, AdminUsersModule, AdminPermissionsModule, AdminSettingsModule, AdminReportsModule, AdminAuditModule, SystemHealthModule ],
 })
 export class AppModule {}
