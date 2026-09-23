@@ -11,6 +11,7 @@ import { AdminSettingsModule } from './modules/admin-settings/admin-settings.mod
 import { AdminReportsModule } from './modules/admin-reports/admin-reports.module';
 import { AdminAuditModule } from './modules/admin-audit/admin-audit.module';
 import { SystemHealthModule } from './modules/system-health/system-health.module';
+import { LibrarianDashboardModule } from './modules/librarian-dashboard/librarian-dashboard.module';
 
-@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../../../..', '.env'), load: [jwtConfig] }), AuthModule, HealthModule, DashboardModule, AdminUsersModule, AdminPermissionsModule, AdminSettingsModule, AdminReportsModule, AdminAuditModule, SystemHealthModule ] })
+@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../../../..', '.env'), load: [jwtConfig] }), AuthModule, HealthModule, DashboardModule, AdminUsersModule, AdminPermissionsModule, AdminSettingsModule, AdminReportsModule, AdminAuditModule, SystemHealthModule, LibrarianDashboardModule ] })
 export class AppModule {}

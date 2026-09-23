@@ -6,6 +6,7 @@ import databaseConfig from './config/database.config';
 import { UsersModule } from './modules/users/users.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { SystemHealthModule } from './modules/system-health/system-health.module';
 
 @Controller('health')
 class HealthController {
@@ -20,7 +21,7 @@ class HealthController {
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({ uri: config.getOrThrow<string>('MONGODB_URI') }),
     }),
-    UsersModule, SettingsModule, AuditModule,
+    UsersModule, SettingsModule, AuditModule, SystemHealthModule,
   ],
   controllers: [HealthController],
 })

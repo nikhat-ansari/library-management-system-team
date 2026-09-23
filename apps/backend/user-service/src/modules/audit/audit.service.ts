@@ -5,8 +5,8 @@ import { AuditLog, AuditLogDocument, type AuditSummary, type AuditValue } from '
 import { User, type UserDocument } from '../../schemas/user.schema';
 import { AuditLogQueryDto } from './dto/audit-log-query.dto';
 
-export type AuditAction = 'USER_CREATED' | 'USER_UPDATED' | 'USER_STATUS_CHANGED' | 'PERMISSIONS_CHANGED' | 'SYSTEM_SETTINGS_UPDATED' | 'HOLIDAY_CREATED' | 'HOLIDAY_DELETED';
-export type AuditModule = 'USER_MANAGEMENT' | 'PERMISSIONS' | 'SYSTEM_SETTINGS' | 'HOLIDAY_CALENDAR';
+export type AuditAction = 'USER_CREATED' | 'USER_UPDATED' | 'USER_STATUS_CHANGED' | 'PERMISSIONS_CHANGED' | 'SYSTEM_SETTINGS_UPDATED' | 'HOLIDAY_CREATED' | 'HOLIDAY_DELETED' | 'AI_SETTINGS_UPDATED';
+export type AuditModule = 'USER_MANAGEMENT' | 'PERMISSIONS' | 'SYSTEM_SETTINGS' | 'HOLIDAY_CALENDAR' | 'AI_SETTINGS';
 
 export interface CreateAuditEntry {
   actorId: string;

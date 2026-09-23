@@ -17,10 +17,10 @@ export class AuditLog {
   @Prop({ required: true, index: true })
   actorId!: string;
 
-  @Prop({ required: true, enum: ['USER_CREATED', 'USER_UPDATED', 'USER_STATUS_CHANGED', 'PERMISSIONS_CHANGED', 'SYSTEM_SETTINGS_UPDATED', 'HOLIDAY_CREATED', 'HOLIDAY_DELETED'], index: true })
+  @Prop({ required: true, enum: ['USER_CREATED', 'USER_UPDATED', 'USER_STATUS_CHANGED', 'PERMISSIONS_CHANGED', 'SYSTEM_SETTINGS_UPDATED', 'HOLIDAY_CREATED', 'HOLIDAY_DELETED', 'AI_SETTINGS_UPDATED'], index: true })
   action!: string;
 
-  @Prop({ required: true, enum: ['USER_MANAGEMENT', 'PERMISSIONS', 'SYSTEM_SETTINGS', 'HOLIDAY_CALENDAR'], index: true })
+  @Prop({ required: true, enum: ['USER_MANAGEMENT', 'PERMISSIONS', 'SYSTEM_SETTINGS', 'HOLIDAY_CALENDAR', 'AI_SETTINGS'], index: true })
   module!: string;
 
   @Prop({ required: true, type: AuditRecordReferenceSchema })
