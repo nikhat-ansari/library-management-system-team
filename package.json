@@ -13,7 +13,7 @@
     "dev:frontend": "npm run dev --workspace=@lms/frontend",
     "dev:backend": "npm run start:dev --workspace=@lms/api-gateway",
     "dev:gateway": "npm run start:dev --workspace=@lms/api-gateway",
-    "dev:backend:all": "concurrently --names gateway,auth,users --prefix-colors blue,green,magenta \"npm run start:dev --workspace=@lms/api-gateway\" \"npm run start:dev --workspace=@lms/auth-service\" \"npm run start:dev --workspace=@lms/user-service\"",
+    "dev:backend:all": "concurrently --names gateway,auth,users,catalog,circ --prefix-colors blue,green,magenta,yellow,cyan \"npm run start:dev --workspace=@lms/api-gateway\" \"npm run start:dev --workspace=@lms/auth-service\" \"npm run start:dev --workspace=@lms/user-service\" \"npm run start:dev --workspace=@lms/catalog-service\" \"npm run start:dev --workspace=@lms/circulation-service\"",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"

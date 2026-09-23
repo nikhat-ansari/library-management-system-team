@@ -1,0 +1,3 @@
+title,isbn,categoryId,authorId,publisherId,acquisitionType,acquisitionDate,cost,vendorOrSource
+Dune,9780441172719-1790069905308,6ab24c9194fc39ea0d8ba8d4,6ab24c9194fc39ea0d8ba8d5,6ab24c9194fc39ea0d8ba8d6,PURCHASED,2023-01-01,15.99,Amazon
+InvalidBook,999,invalid,invalid,invalid,INVALID_TYPE,,,-1,

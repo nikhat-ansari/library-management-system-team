@@ -9,8 +9,13 @@ import { AdminSettingsModule } from './modules/admin-settings/admin-settings.mod
 import { AdminReportsModule } from './modules/admin-reports/admin-reports.module';
 import { AdminAuditModule } from './modules/admin-audit/admin-audit.module';
 import { SystemHealthModule } from './modules/system-health/system-health.module';
+import { LibrarianDashboardModule } from './modules/librarian-dashboard/librarian-dashboard.module';
+import { BookCopiesModule } from './modules/book-copies/book-copies.module';
+import { BooksModule } from './modules/books/books.module';
+import { ReferenceDataModule } from './modules/reference-data/reference-data.module';
+import { CirculationModule } from './modules/circulation/circulation.module';
 
 @Module({
-  imports: [HealthModule, AuthModule, UsersModule, AdminDashboardModule, AdminUsersModule, AdminPermissionsModule, AdminSettingsModule, AdminReportsModule, AdminAuditModule, SystemHealthModule ],
+  imports: [HealthModule, AuthModule, UsersModule, AdminDashboardModule, AdminUsersModule, AdminPermissionsModule, AdminSettingsModule, AdminReportsModule, AdminAuditModule, SystemHealthModule, LibrarianDashboardModule, BooksModule, BookCopiesModule, ReferenceDataModule, CirculationModule],
 })
 export class AppModule {}

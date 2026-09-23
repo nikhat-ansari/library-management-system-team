@@ -64,6 +64,18 @@ export class UsersService {
     return bcrypt.compare(plainPassword, hash);
   }
 
+  async searchMembers(query: string): Promise<UserDto[]> {
+    const searchRegex = new RegExp(query, 'i');
+    const members = await this.userModel.find({
+      role: 'MEMBER',
+      $or: [
+        { name: searchRegex },
+        { email: searchRegex },
+      ]
+    }).limit(10).exec();
+    return members.map(u => this.toDto(u));
+  }
+
   async getMemberDashboardCounts(): Promise<{ total: number; active: number }> {
     const [total, active] = await Promise.all([
       this.userModel.countDocuments({ role: 'MEMBER' }).exec(),

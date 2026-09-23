@@ -33,6 +33,11 @@ export class UsersController {
     };
   }
 
+  @Get('search/members')
+  async searchMembers(@Query('q') query: string) {
+    return this.usersService.searchMembers(query || '');
+  }
+
   @Get('dashboard/member-counts')
   async getMemberDashboardCounts(): Promise<{ total: number; active: number }> {
     return this.usersService.getMemberDashboardCounts();
