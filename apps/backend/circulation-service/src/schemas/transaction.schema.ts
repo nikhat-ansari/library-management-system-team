@@ -10,6 +10,22 @@ export enum TransactionStatus {
   DAMAGED = 'DAMAGED',
 }
 
+export enum FineAdjustmentType {
+  PAYMENT = 'PAYMENT',
+  WAIVER = 'WAIVER',
+}
+
+@Schema({ _id: false })
+export class FineAdjustment {
+  @Prop({ required: true }) id!: string;
+  @Prop({ required: true, enum: FineAdjustmentType }) type!: FineAdjustmentType;
+  @Prop({ required: true }) amount!: number;
+  @Prop({ required: true }) reason!: string;
+  @Prop({ required: true }) actorId!: string;
+  @Prop({ required: true, type: Date }) createdAt!: Date;
+}
+
+
 @Schema({ collection: 'transactions', timestamps: true, autoCreate: true })
 export class Transaction {
   @Prop({ required: true, type: Types.ObjectId, index: true })
@@ -41,6 +57,15 @@ export class Transaction {
 
   @Prop({ type: Number })
   fineAmount?: number;
+
+  @Prop({ type: Number, default: 0 })
+  finePaidAmount!: number;
+
+  @Prop({ type: Number, default: 0 })
+  fineWaivedAmount!: number;
+
+  @Prop({ type: [FineAdjustment], default: [] })
+  fineAdjustments!: FineAdjustment[];
 
   // Virtual property for overdue status
   isOverdue?: boolean;

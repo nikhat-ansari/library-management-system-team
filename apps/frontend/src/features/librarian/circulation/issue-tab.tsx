@@ -1,14 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MemberSearch } from './member-search';
+import { BookSearch } from './book-search';
 import { Member } from '../../../services/members.service';
 import { circulationService } from '../../../services/circulation.service';
+import { bookCopiesService } from '../../../services/book-copies.service';
+import { Book } from '../../../types/books';
+import { BookCopy } from '../../../types/book-copies';
 
 export function IssueTab() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [availableCopies, setAvailableCopies] = useState<BookCopy[]>([]);
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetchingCopies, setFetchingCopies] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedBook) {
+      const fetchCopies = async () => {
+        setFetchingCopies(true);
+        try {
+          const response = await bookCopiesService.findByBookId(selectedBook._id);
+          const available = response.copies.filter((c: BookCopy) => c.status === 'Available');
+          setAvailableCopies(available);
+          if (available.length > 0) {
+            setBarcode(available[0].barcode || '');
+          } else {
+            setBarcode('');
+          }
+        } catch (err) {
+          console.error('Failed to fetch copies', err);
+          setAvailableCopies([]);
+          setBarcode('');
+        } finally {
+          setFetchingCopies(false);
+        }
+      };
+      fetchCopies();
+    } else {
+      setAvailableCopies([]);
+      setBarcode('');
+    }
+  }, [selectedBook]);
 
   const handleIssue = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +60,7 @@ export function IssueTab() {
       });
       setSuccess(`Successfully issued book with barcode "${barcode.trim()}" to ${selectedMember.name}.`);
       setBarcode('');
+      setSelectedBook(null); // Reset book selection
     } catch (err: any) {
       setError(err.message || 'Failed to issue book. Please verify the barcode and member status.');
     } finally {
@@ -39,7 +75,7 @@ export function IssueTab() {
           <div className="md:col-span-1">
             <h3 className="text-lg font-medium leading-6 text-slate-900">Issue Book</h3>
             <p className="mt-1 text-sm text-slate-500">
-              Select a member and scan the book copy's barcode to issue it.
+              Select a member, search for a book, and select an available copy to issue it.
             </p>
           </div>
           <div className="mt-5 md:col-span-2 md:mt-0">
@@ -60,21 +96,61 @@ export function IssueTab() {
               </div>
 
               <div>
-                <label htmlFor="barcode" className="block text-sm font-medium leading-6 text-slate-900">
-                  Book Copy Barcode
-                </label>
+                <label className="block text-sm font-medium leading-6 text-slate-900">Book</label>
                 <div className="mt-2">
-                  <input
-                    type="text"
-                    id="barcode"
-                    value={barcode}
-                    onChange={(e) => setBarcode(e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="e.g. BC-987654321"
-                    required
-                  />
+                  {!selectedBook ? (
+                    <BookSearch onSelect={setSelectedBook} />
+                  ) : (
+                    <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-semibold">
+                          {selectedBook.title.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{selectedBook.title}</p>
+                          <p className="text-xs text-slate-500">{selectedBook.isbn || 'No ISBN'}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedBook(null)}
+                        className="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {selectedBook && (
+                <div>
+                  <label htmlFor="barcode" className="block text-sm font-medium leading-6 text-slate-900">
+                    Available Book Copy
+                  </label>
+                  <div className="mt-2">
+                    {fetchingCopies ? (
+                      <div className="text-sm text-slate-500">Loading available copies...</div>
+                    ) : availableCopies.length > 0 ? (
+                      <select
+                        id="barcode"
+                        value={barcode}
+                        onChange={(e) => setBarcode(e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        required
+                      >
+                        {availableCopies.map((copy) => (
+                          <option key={copy._id} value={copy.barcode}>
+                            {copy.barcode} {copy.accessionNumber ? `(${copy.accessionNumber})` : ''} - {copy.condition}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="text-sm text-red-500">No available copies for this book.</div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {error && (
                 <div className="rounded-md bg-red-50 p-4 border border-red-200">

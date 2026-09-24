@@ -23,6 +23,7 @@ import { BookEditPage } from '../features/librarian/books/book-edit-page';
 import { BookImportPage } from '../features/librarian/books/book-import-page';
 import { BookDetailsPage } from '../features/librarian/books/book-details-page';
 import { CirculationPage } from '../features/librarian/circulation/circulation-page';
+import { FineManagementPage } from '../features/librarian/fines/fine-management-page';
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
           { path: '/librarian/books/:id', element: <BookDetailsPage /> },
           { path: '/librarian/books/:id/edit', element: <BookEditPage /> },
           { path: '/librarian/circulation', element: <CirculationPage /> },
+          { path: '/librarian/fines', element: <FineManagementPage /> },
         ],
       },
       {

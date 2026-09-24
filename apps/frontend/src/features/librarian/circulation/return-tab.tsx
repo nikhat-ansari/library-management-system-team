@@ -1,12 +1,36 @@
 import React, { useState } from 'react';
-import { circulationService } from '../../../services/circulation.service';
+import { circulationService, Transaction } from '../../../services/circulation.service';
+import { MemberSearch } from './member-search';
+import { Member } from '../../../services/members.service';
 
 export function ReturnTab() {
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [activeLoans, setActiveLoans] = useState<Transaction[]>([]);
+  const [fetchingLoans, setFetchingLoans] = useState(false);
+  
   const [barcode, setBarcode] = useState('');
   const [condition, setCondition] = useState<'NORMAL' | 'LOST' | 'DAMAGED'>('NORMAL');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const handleMemberSelect = async (member: Member | null) => {
+    setSelectedMember(member);
+    if (member) {
+      setFetchingLoans(true);
+      try {
+        const loans = await circulationService.getMemberActiveLoans(member.id);
+        setActiveLoans(loans);
+      } catch (err) {
+        console.error('Failed to fetch active loans', err);
+        setActiveLoans([]);
+      } finally {
+        setFetchingLoans(false);
+      }
+    } else {
+      setActiveLoans([]);
+    }
+  };
 
   const handleReturn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,11 +52,18 @@ export function ReturnTab() {
       );
       setBarcode('');
       setCondition('NORMAL');
+      if (selectedMember) {
+        handleMemberSelect(selectedMember); // Refresh loans
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to return book. Verify the barcode is correct and issued.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const getBarcodeFromLoan = (loan: Transaction) => {
+    return typeof loan.copyId === 'string' ? loan.copyId : (loan.copyId as any).barcode;
   };
 
   return (
@@ -48,6 +79,16 @@ export function ReturnTab() {
           <div className="mt-5 md:col-span-2 md:mt-0">
             <form onSubmit={handleReturn} className="space-y-6">
               <div>
+                <label className="block text-sm font-medium leading-6 text-slate-900">
+                  Member (Optional - for suggestions)
+                </label>
+                <div className="mt-2">
+                  <MemberSearch onSelect={handleMemberSelect} />
+                </div>
+                {fetchingLoans && <p className="mt-1 text-xs text-slate-500">Fetching active loans...</p>}
+              </div>
+
+              <div>
                 <label htmlFor="barcode" className="block text-sm font-medium leading-6 text-slate-900">
                   Book Copy Barcode
                 </label>
@@ -55,12 +96,21 @@ export function ReturnTab() {
                   <input
                     type="text"
                     id="barcode"
+                    list="active-loans-list"
                     value={barcode}
                     onChange={(e) => setBarcode(e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="e.g. BC-987654321"
+                    placeholder="e.g. BC-987654321 (Scan or select)"
                     required
+                    autoComplete="off"
                   />
+                  <datalist id="active-loans-list">
+                    {activeLoans.map((loan) => {
+                       const code = getBarcodeFromLoan(loan);
+                       const bookTitle = typeof loan.bookId === 'string' ? loan.bookId : (loan.bookId as any).title;
+                       return <option key={loan._id} value={code}>{bookTitle}</option>
+                    })}
+                  </datalist>
                 </div>
               </div>
 
