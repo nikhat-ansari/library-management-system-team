@@ -163,4 +163,44 @@ export class CirculationService {
     // Add virtuals to response
     return transactions.map(t => t.toJSON());
   }
+
+  async payFine(actorId: string, transactionId: string, amount: number) {
+    if (!Types.ObjectId.isValid(transactionId)) throw new BadRequestException('Invalid transaction ID');
+    
+    const transaction = await this.transactionModel.findById(transactionId);
+    if (!transaction) throw new NotFoundException('Transaction not found');
+    
+    transaction.finePaidAmount += amount;
+    transaction.fineAdjustments.push({
+      id: new Types.ObjectId().toString(),
+      type: 'PAYMENT' as any,
+      amount,
+      reason: 'Fine Payment',
+      actorId,
+      createdAt: new Date()
+    });
+
+    await transaction.save();
+    return transaction;
+  }
+
+  async waiveFine(actorId: string, transactionId: string, amount: number, reason: string) {
+    if (!Types.ObjectId.isValid(transactionId)) throw new BadRequestException('Invalid transaction ID');
+    
+    const transaction = await this.transactionModel.findById(transactionId);
+    if (!transaction) throw new NotFoundException('Transaction not found');
+    
+    transaction.fineWaivedAmount += amount;
+    transaction.fineAdjustments.push({
+      id: new Types.ObjectId().toString(),
+      type: 'WAIVER' as any,
+      amount,
+      reason,
+      actorId,
+      createdAt: new Date()
+    });
+
+    await transaction.save();
+    return transaction;
+  }
 }

@@ -37,4 +37,22 @@ export class CirculationController {
   async getMemberActiveLoans(@Param('id') memberId: string) {
     return this.circulationService.getMemberActiveLoans(memberId);
   }
+
+  @Post('fine/:id/pay')
+  async payFine(
+    @Param('id') transactionId: string,
+    @Headers('x-user-id') actorId: string,
+    @Body() dto: { amount: number }
+  ) {
+    return this.circulationService.payFine(actorId || 'SYSTEM', transactionId, dto.amount);
+  }
+
+  @Post('fine/:id/waive')
+  async waiveFine(
+    @Param('id') transactionId: string,
+    @Headers('x-user-id') actorId: string,
+    @Body() dto: { amount: number; reason: string }
+  ) {
+    return this.circulationService.waiveFine(actorId || 'SYSTEM', transactionId, dto.amount, dto.reason);
+  }
 }

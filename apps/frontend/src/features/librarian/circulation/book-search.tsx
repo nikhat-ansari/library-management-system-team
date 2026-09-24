@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { membersService, Member } from '../../../services/members.service';
+import { booksService } from '../../../services/books.service';
+import { Book } from '../../../types/books';
 
-interface MemberSearchProps {
-  onSelect: (member: Member | null) => void;
+interface BookSearchProps {
+  onSelect: (book: Book | null) => void;
 }
 
-export function MemberSearch({ onSelect }: MemberSearchProps) {
+export function BookSearch({ onSelect }: BookSearchProps) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Member[]>([]);
+  const [results, setResults] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState<Member | null>(null);
+  const [selected, setSelected] = useState<Book | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -34,10 +35,10 @@ export function MemberSearch({ onSelect }: MemberSearchProps) {
       setLoading(true);
       setHasSearched(true);
       try {
-        const data = await membersService.searchMembers(query);
-        setResults(data);
+        const data = await booksService.findAll({ search: query, limit: 10 });
+        setResults(data.items || []);
       } catch (err) {
-        console.error('Failed to search members', err);
+        console.error('Failed to search books', err);
         setResults([]);
       } finally {
         setLoading(false);
@@ -52,11 +53,11 @@ export function MemberSearch({ onSelect }: MemberSearchProps) {
       <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center space-x-3">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-semibold">
-            {selected.name.charAt(0).toUpperCase()}
+            {selected.title.charAt(0).toUpperCase()}
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-900">{selected.name}</p>
-            <p className="text-xs text-slate-500">{selected.email}</p>
+            <p className="text-sm font-medium text-slate-900">{selected.title}</p>
+            <p className="text-xs text-slate-500">{selected.isbn || 'No ISBN'}</p>
           </div>
         </div>
         <button
@@ -87,7 +88,7 @@ export function MemberSearch({ onSelect }: MemberSearchProps) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search member by name or email..."
+          placeholder="Search book by title..."
           autoComplete="off"
           className="block w-full rounded-md border-0 py-2.5 pl-10 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
         />
@@ -100,25 +101,25 @@ export function MemberSearch({ onSelect }: MemberSearchProps) {
 
       {!loading && hasSearched && results.length === 0 && query.trim().length >= 2 && (
         <div className="absolute z-10 mt-1 w-full rounded-md bg-white py-4 px-3 text-sm text-slate-500 shadow-lg ring-1 ring-black ring-opacity-5">
-          No members found matching "{query}".
+          No books found matching "{query}".
         </div>
       )}
 
       {results.length > 0 && (
         <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-          {results.map((member) => (
+          {results.map((book) => (
             <li
-              key={member.id}
+              key={book._id}
               onClick={() => {
-                setSelected(member);
-                onSelect(member);
+                setSelected(book);
+                onSelect(book);
                 setResults([]);
               }}
               className="relative cursor-pointer select-none py-2 pl-3 pr-9 text-slate-900 hover:bg-indigo-50 hover:text-indigo-900 transition-colors"
             >
               <div className="flex flex-col">
-                <span className="font-medium">{member.name}</span>
-                <span className="text-xs text-slate-500">{member.email}</span>
+                <span className="font-medium">{book.title}</span>
+                <span className="text-xs text-slate-500">{book.isbn || 'No ISBN'}</span>
               </div>
             </li>
           ))}

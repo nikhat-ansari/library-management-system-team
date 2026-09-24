@@ -8,6 +8,7 @@ const navigation = [
   { label: 'Circulation', to: '/librarian/circulation' },
   { label: 'Reservations', to: '/librarian/reservations' },
   { label: 'Seat Bookings', to: '/librarian/seats' },
+  { label: 'Fines', to: '/librarian/fines' },
 ];
 
 export function LibrarianLayout({ children }: { children: ReactNode }) {

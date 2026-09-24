@@ -23,6 +23,8 @@ export enum ChargeType {
   CHARGE = 'CHARGE',
   REVERSAL = 'REVERSAL',
   ADJUSTMENT = 'ADJUSTMENT',
+  PAYMENT = 'PAYMENT',
+  WAIVER = 'WAIVER',
 }
 
 @Schema({ _id: false })

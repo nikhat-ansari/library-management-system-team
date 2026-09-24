@@ -336,7 +336,7 @@ export function BookCreatePage() {
               </div>
 
               <div className="sm:col-span-1">
-                <label htmlFor="cost" className="block text-sm font-medium leading-6 text-gray-900">Cost ($)</label>
+                <label htmlFor="cost" className="block text-sm font-medium leading-6 text-gray-900">Cost (₹)</label>
                 <div className="mt-2">
                   <input
                     type="number"

@@ -1,0 +1,3 @@
+const { ValidationPipe } = require('@nestjs/common');
+// This is not easily runnable without a Nest app context...
+// Let's just create a small Nest app and hit it.
